@@ -1,0 +1,24 @@
+[
+  {
+    "Id": "8fbdb807-1d0b-4425-8b08-3ba3ec68c743",
+    "Name": "Hotel Central",
+    "Address": "Calle Principal 1, Santa Rosa de Copan",
+    "StarsMichelin": "4",
+    "NumberPhone": "90411336"
+  },
+  {
+    "Id": "9537ea02-93bf-4338-bf25-5b565d247a9f",
+    "Name": "Hotel del Mar",
+    "Address": "Avenida Costera 456, Puerto Cortes",
+    "StarsMichelin": "5",
+    "NumberPhone": "81706534"
+  },
+  {
+    "Id": "a1c24a67-8d41-4b59-bb0e-1d9d8d6b9a92",
+    "Name": "Hotel La Esperanza",
+    "Address": "Calle de los Pinos 789, La Esperanza",
+    "StarsMichelin": "3",
+    "NumberPhone": "92304567"
+  }
+]
+

@@ -1,0 +1,74 @@
+[
+  {
+    "Id": "e802e0b6-fae1-4824-b8e2-9351252f489c",
+    "NumberRoom": "1",
+    "TypeRoom": "SENCILLA",
+    "PriceNight": "700",
+    "Condition": "DISPONIBLE",
+    "HotelId": "8fbdb807-1d0b-4425-8b08-3ba3ec68c743"
+  },
+  {
+    "Id": "a2c2e0b8-5a73-4a0b-8f56-9294534d6ec8",
+    "NumberRoom": "2",
+    "TypeRoom": "DOBLE",
+    "PriceNight": "1200",
+    "Condition": "EN MANTENIMIENTO",
+    "HotelId": "8fbdb807-1d0b-4425-8b08-3ba3ec68c743"
+  },
+  {
+    "Id": "b3d4e1c1-68f1-4fbb-9e8d-1c5c2b8a2ec9",
+    "NumberRoom": "3",
+    "TypeRoom": "SUITE",
+    "PriceNight": "2500",
+    "Condition": "OCUPADO",
+    "HotelId": "8fbdb807-1d0b-4425-8b08-3ba3ec68c743"
+  },
+  {
+    "Id": "c4e5d2e2-7a2b-47ac-8fbe-29c3e2b6c5d4",
+    "NumberRoom": "1",
+    "TypeRoom": "SENCILLA",
+    "PriceNight": "800",
+    "Condition": "DISPONIBLE",
+    "HotelId": "9537ea02-93bf-4338-bf25-5b565d247a9f"
+  },
+  {
+    "Id": "0753d88a-398f-427e-889f-a8f7a8b24c01",
+    "NumberRoom": "2",
+    "TypeRoom": "DOBLE",
+    "PriceNight": "1500",
+    "Condition": "OCUPADO",
+    "HotelId": "9537ea02-93bf-4338-bf25-5b565d247a9f"
+  },
+  {
+    "Id": "d5f6e3f3-83a4-4bcd-9fde-38d4f3c6d7f5",
+    "NumberRoom": "3",
+    "TypeRoom": "SUITE",
+    "PriceNight": "2750",
+    "Condition": "EN MANTENIMIENTO",
+    "HotelId": "9537ea02-93bf-4338-bf25-5b565d247a9f"
+  },
+  {
+    "Id": "f8c8e5f5-9c7d-4def-bfde-58e6f5e8f9c7",
+    "NumberRoom": "1",
+    "TypeRoom": "SENCILLA",
+    "PriceNight": "750",
+    "Condition": "OCUPADO",
+    "HotelId": "a1c24a67-8d41-4b59-bb0e-1d9d8d6b9a92"
+  },
+  {
+    "Id": "e6f7e4e4-94b5-4cde-afce-49d5f4d7e8f6",
+    "NumberRoom": "2",
+    "TypeRoom": "DOBLE",
+    "PriceNight": "1100",
+    "Condition": "DISPONIBLE",
+    "HotelId": "a1c24a67-8d41-4b59-bb0e-1d9d8d6b9a92"
+  },
+  {
+    "Id": "606b8d44-3722-4511-8629-3dc43feef3b1",
+    "NumberRoom": "3",
+    "TypeRoom": "SUITE",
+    "PriceNight": "2000",
+    "Condition": "EN MANTENIMIENTO",
+    "HotelId": "a1c24a67-8d41-4b59-bb0e-1d9d8d6b9a92"
+  }
+]

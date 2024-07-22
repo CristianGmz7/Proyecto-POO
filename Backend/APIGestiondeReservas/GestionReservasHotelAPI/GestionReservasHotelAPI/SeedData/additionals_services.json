@@ -1,0 +1,57 @@
+[
+  {
+    "Id": "8b6ea8ad-92a7-4e91-91a7-79993fb2c29f",
+    "Name": "Desayuno",
+    "Price": "100",
+    "HotelId": "8fbdb807-1d0b-4425-8b08-3ba3ec68c743"
+  },
+  {
+    "Id": "290258bb-f5e4-4a9b-ba8e-082465a43b69",
+    "Name": "Transporte al terminal",
+    "Price": "150",
+    "HotelId": "9537ea02-93bf-4338-bf25-5b565d247a9f"
+  },
+  {
+    "Id": "17c625ec-db25-47d6-ab81-a40affb8b89c",
+    "Name": "Servicio de lavanderia",
+    "Price": "120",
+    "HotelId": "a1c24a67-8d41-4b59-bb0e-1d9d8d6b9a92"
+  },
+  {
+    "Id": "5c8d35a8-f2d1-4b0f-8e1d-1e0b7376d5c7",
+    "Name": "Servicio a la habitación",
+    "Price": "200",
+    "HotelId": "8fbdb807-1d0b-4425-8b08-3ba3ec68c743"
+  },
+  {
+    "Id": "b915f5d1-305e-45b3-a571-bbd1f90c7a7d",
+    "Name": "Spa",
+    "Price": "250",
+    "HotelId": "9537ea02-93bf-4338-bf25-5b565d247a9f"
+  },
+  {
+    "Id": "2f5c7a4a-1b6e-4d5e-97b3-072a0c61e8e5",
+    "Name": "Desayuno",
+    "Price": "110",
+    "HotelId": "a1c24a67-8d41-4b59-bb0e-1d9d8d6b9a92"
+  },
+  {
+    "Id": "ab6fa2e7-5c3e-4e71-a9b7-d0edfc0c5c77",
+    "Name": "Transporte al terminal",
+    "Price": "160",
+    "HotelId": "8fbdb807-1d0b-4425-8b08-3ba3ec68c743"
+  },
+  {
+    "Id": "39d7f99e-123b-4f89-99f7-1cbfe7806c4a",
+    "Name": "Gimnasio",
+    "Price": "80",
+    "HotelId": "9537ea02-93bf-4338-bf25-5b565d247a9f"
+  },
+  {
+    "Id": "db08b1c2-6d28-4a39-9fb2-924bc9c7b195",
+    "Name": "Piscina",
+    "Price": "100",
+    "HotelId": "a1c24a67-8d41-4b59-bb0e-1d9d8d6b9a92"
+  }
+
+]

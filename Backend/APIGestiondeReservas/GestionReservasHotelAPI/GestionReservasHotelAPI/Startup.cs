@@ -1,4 +1,7 @@
 ﻿using GestionReservasHotelAPI.Database;
+using GestionReservasHotelAPI.Helpers;
+using GestionReservasHotelAPI.Services;
+using GestionReservasHotelAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestionReservasHotelAPI;
@@ -24,9 +27,10 @@ public class Startup
         options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
         // Add custom services
-
+        services.AddTransient<IHotelsService, HotelsService>();
 
         // Add AutoMapper
+        services.AddAutoMapper(typeof(AutoMapperProfile));
 
     }
 

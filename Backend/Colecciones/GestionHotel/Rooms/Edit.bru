@@ -1,0 +1,20 @@
+meta {
+  name: Edit
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{PATH}}/rooms/ba8953ff-41b3-4c1b-9a8b-08dcac5dd23e
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "numberRoom": 4,
+    "typeRoom": "DOBLE",
+    "priceNight": 1500,
+    "condition": "EN MANTENIMIENTO"
+  }
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{PATH}}/rooms
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "numberRoom": 4,
+    "typeRoom": "DOBLE",
+    "priceNight": 1000,
+    "condition": "DISPONIBLE",
+    "hotelId": "8fbdb807-1d0b-4425-8b08-3ba3ec68c743"
+  }
+}

@@ -37,7 +37,7 @@ public class RoomsService : IRoomsService
         };
     }
 
-    //Nuevo metodo obtener todas las habitaciones de un hotel
+    //metodo obtener todas las habitaciones de un hotel
     public async Task<ResponseDto<List<RoomDto>>> GetRoomsOneHotelAsync(Guid id)
     {
         var hotelEntity = await _context.Hotels.FindAsync(id);
@@ -74,7 +74,6 @@ public class RoomsService : IRoomsService
         };
 
     }
-    //Fin de nuevo metodo
 
     public async Task<ResponseDto<RoomDto>> GetRoomById(Guid id)
     {
@@ -105,7 +104,31 @@ public class RoomsService : IRoomsService
     {
         var roomEntity = _mapper.Map<RoomEntity>(dto);
 
-        //validar repeticion de # de habitacion
+        var hotelEntity = await _context.Hotels.FindAsync(dto.HotelId);
+
+        if (hotelEntity == null)
+        {
+            return new ResponseDto<RoomDto>
+            {
+                StatusCode = 404,
+                Status = false,
+                Message = "El hotel no existe"
+            };
+        }
+
+        var existingRoom = await _context.Rooms
+            .Where(r => r.HotelId == dto.HotelId && r.NumberRoom == dto.NumberRoom)
+            .FirstOrDefaultAsync();
+
+        if(existingRoom != null) {
+            return new ResponseDto<RoomDto>
+            {
+                StatusCode = 400,
+                Status = false,
+                Message = "El numero de habitacion ya existe en este hotel"
+            };
+        }
+
         _context.Rooms.Add(roomEntity);
         await _context.SaveChangesAsync();
 
@@ -131,6 +154,21 @@ public class RoomsService : IRoomsService
                 Status = false,
                 StatusCode = 404,
                 Message = "No se encontro el registro"
+            };
+        }
+
+        //Validar que no se repita numero de habitacion en el hotel donde pertenece
+        var existingRoom = await _context.Rooms
+             .Where(r => r.HotelId == roomEntity.HotelId && r.NumberRoom == dto.NumberRoom && r.Id != id)
+             .FirstOrDefaultAsync();
+
+        if (existingRoom != null)
+        {
+            return new ResponseDto<RoomDto>
+            {
+                Status = false,
+                StatusCode = 400,
+                Message = "El número de habitación ya existe en este hotel"
             };
         }
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GestionReservasHotelAPI.Controllers;
 
+//[Route("api/rooms")]
 [Route("api/rooms")]
 [ApiController]
 

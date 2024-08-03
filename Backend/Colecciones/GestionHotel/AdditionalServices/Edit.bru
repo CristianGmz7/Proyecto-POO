@@ -1,0 +1,18 @@
+meta {
+  name: Edit
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{PATH}}/additionalServices/A42A63B9-945B-4BB8-3116-08DCB3BAEF2A
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Cuidado de mascota",
+    "price": 90
+  }
+}

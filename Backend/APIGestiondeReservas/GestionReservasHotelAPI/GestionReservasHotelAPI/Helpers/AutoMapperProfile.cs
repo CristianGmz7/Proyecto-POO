@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GestionReservasHotelAPI.Database.Entities;
+using GestionReservasHotelAPI.Dtos.AdditionalServices;
 using GestionReservasHotelAPI.Dtos.Hotels;
 using GestionReservasHotelAPI.Dtos.Rooms;
 //using GestionReservasHotelAPI.Dtos.Reservations;
@@ -11,8 +12,8 @@ public class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         MapsForHotels();
-
         MapsForRooms();
+        MapsForAdditionalServices();
     }
 
     private void MapsForHotels()
@@ -30,5 +31,12 @@ public class AutoMapperProfile : Profile
         //src: Dto; dest: Entity; convertir CreateDto y EditDto a Entity (Metodos Post y Put)
         CreateMap<RoomCreateDto, RoomEntity>();
         CreateMap<RoomEditDto, RoomEntity>();
+    }
+
+    private void MapsForAdditionalServices()
+    {
+        CreateMap<AdditionalServiceEntity, AdditionalServiceDto>();
+        CreateMap<AdditionalServiceCreateDto, AdditionalServiceEntity>();
+        CreateMap<AdditionalServiceEditDto, AdditionalServiceEntity>();
     }
 }

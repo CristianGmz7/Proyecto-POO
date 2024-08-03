@@ -29,6 +29,7 @@ public class Startup
         // Add custom services
         services.AddTransient<IHotelsService, HotelsService>();
         services.AddTransient<IRoomsService, RoomsService>();
+        services.AddTransient<IAdditionalServicesServices, AdditionalServicesServices>();
 
         // Add AutoMapper
         services.AddAutoMapper(typeof(AutoMapperProfile));

@@ -17,7 +17,7 @@ public class RoomCreateDto
     public string TypeRoom { get; set; }
 
     [Display(Name = "Precio por noche")]
-    [Range(1, double.MaxValue, ErrorMessage = "El {0} debe se mayor o igual a 1")]
+    [Range(1, double.MaxValue, ErrorMessage = "El {0} debe ser mayor o igual a 1")]
     [Required(ErrorMessage = "El {0} es obligatorio")]
     public double PriceNight { get; set; }
 

@@ -17,6 +17,6 @@ public class RoomDto
     public Guid HotelId { get; set; }     
     
     //(solo necesito ver el Id del hotel al que pertenece el hotel, no toda su info)
-    //(no necesito ver por el momento las reservaciones que tenga
+    //(no necesito ver por el momento las reservaciones que tenga)
 
 }

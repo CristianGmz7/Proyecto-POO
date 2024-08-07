@@ -30,6 +30,7 @@ public class Startup
         services.AddTransient<IHotelsService, HotelsService>();
         services.AddTransient<IRoomsService, RoomsService>();
         services.AddTransient<IAdditionalServicesServices, AdditionalServicesServices>();
+        services.AddTransient<IReservationsService, ReservationsService>();
 
         // Add AutoMapper
         services.AddAutoMapper(typeof(AutoMapperProfile));

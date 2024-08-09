@@ -5,7 +5,6 @@ namespace GestionReservasHotelAPI.Dtos.Reservations;
 public class ReservationCreateDto
 {
     [Display(Name = "Fecha inicial")]
-    [Range(1, int.MaxValue)]
     [Required(ErrorMessage = "La {0} es obligatoria")]
     public DateTime StartDate { get; set; }
 

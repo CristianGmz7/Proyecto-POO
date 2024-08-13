@@ -2,6 +2,7 @@
 using GestionReservasHotelAPI.Database.Entities;
 using GestionReservasHotelAPI.Dtos.AdditionalServices;
 using GestionReservasHotelAPI.Dtos.Hotels;
+using GestionReservasHotelAPI.Dtos.Reservations;
 using GestionReservasHotelAPI.Dtos.Rooms;
 //using GestionReservasHotelAPI.Dtos.Reservations;
 
@@ -38,5 +39,12 @@ public class AutoMapperProfile : Profile
         CreateMap<AdditionalServiceEntity, AdditionalServiceDto>();
         CreateMap<AdditionalServiceCreateDto, AdditionalServiceEntity>();
         CreateMap<AdditionalServiceEditDto, AdditionalServiceEntity>();
+    }
+
+    private void MapsForReservation()
+    {
+        //esto creo que no lo utilzare
+        CreateMap<ReservationEntity, ReservationDto>();
+        CreateMap<ReservationCreateDto, ReservationEntity>();
     }
 }

@@ -1,0 +1,24 @@
+meta {
+  name: EditReservation
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{PATH}}/reservations/0E804F0A-4CBA-484F-690C-08DCB890F85B
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "startDate": "2024-08-19T16:25:12.044Z",
+    "finishDate": "2024-08-20T16:25:12.044Z",
+    "roomsList": [
+      "cfabcdc7-d6e5-4a8b-9a93-08dcb6ff3763", "f85920e4-19f6-40f3-9a94-08dcb6ff3763"
+    ],
+    "additionalServicesList": [
+      "44f41c91-fa59-4e3c-752d-08dcb6ff83db"
+    ]
+  }
+}

@@ -557,7 +557,51 @@ public class ReservationsService : IReservationsService
         }   //fin del using
     }   //fin de metodo EditReservationAsync
 
+    public async Task<ResponseDto<ReservationDto>> DeleteReservationAsync(Guid id)
+    {
+        using (var transaction = await _context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var reservationEntity = await _context.Reservations.FindAsync(id);
 
+                if(reservationEntity is null)
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 404,
+                        Status = false,
+                        Message = "La reservacion no existe"
+                    };
+                }
+
+                _context.Reservations.Remove(reservationEntity);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return new ResponseDto<ReservationDto>
+                {
+                    StatusCode = 200,
+                    Status = true,
+                    Message = "Reservacion eliminada correctamente"
+                };
+
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(e, "Error al borrar la reservacion");
+
+                return new ResponseDto<ReservationDto>
+                {
+                    StatusCode = 500,
+                    Status = false,
+                    Message = "Error al borrar la reservacion"
+                };
+            }
+        }
+    }
 
     //AQUI SE TENDRIAN QUE COLOCAR LOS CODIGOS RECICLADOS 
 }

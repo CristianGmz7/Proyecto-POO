@@ -31,5 +31,13 @@ public class ReservationsController : ControllerBase
     {
         var response = await _reservationsService.EditReservationAsync(dto, id);
         return StatusCode(response.StatusCode, response);
-    } 
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ResponseDto<ReservationDto>>> Delete (Guid id)
+    {
+        var response = await _reservationsService?.DeleteReservationAsync(id);
+
+        return StatusCode(response.StatusCode, response);
+    }
 }

@@ -25,4 +25,11 @@ public class ReservationsController : ControllerBase
 
         return StatusCode(response.StatusCode, response);
     }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ResponseDto<ReservationDto>>> Edit(ReservationEditDto dto, Guid id)
+    {
+        var response = await _reservationsService.EditReservationAsync(dto, id);
+        return StatusCode(response.StatusCode, response);
+    } 
 }

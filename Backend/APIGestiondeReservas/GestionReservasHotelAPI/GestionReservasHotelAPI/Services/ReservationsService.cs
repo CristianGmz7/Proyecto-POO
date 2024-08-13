@@ -5,6 +5,7 @@ using GestionReservasHotelAPI.Dtos.Common;
 using GestionReservasHotelAPI.Dtos.Reservations;
 using GestionReservasHotelAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace GestionReservasHotelAPI.Services;
 
@@ -256,4 +257,307 @@ public class ReservationsService : IReservationsService
             }   //fin catch
         }   //fin de using
     }   //fin de metodo CreateReservationAsync
+
+    public async Task<ResponseDto<ReservationDto>> EditReservationAsync (ReservationEditDto dto, Guid id)
+    {
+        using (var transaction = await _context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                //verificar que la reserva exista
+                var reservationEntity = await _context.Reservations.FindAsync(id);
+
+                if (reservationEntity == null)
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 404,
+                        Status = false,
+                        Message = "La reserva no existe"
+                    };
+                }
+
+                //Verificar error que la fecha actual sea menor que la fecha de inicio de la reserva
+                if(DateTime.Now >= reservationEntity.StartDate && DateTime.Now <= reservationEntity.FinishDate)
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 400,
+                        Status = false,
+                        Message = "La reserva no puede ser modificada porque se encuentra en proceso"
+                    };
+                }
+
+                //Verificar error que la fecha actual sea mayor que la fecha de fin de la reserva
+                if(DateTime.Now > reservationEntity.FinishDate)
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 400,
+                        Status = false,
+                        Message = "La reserva no puede ser modificada porque ya expiro"
+                    };
+                }
+
+
+                //POSIBLE VERIFICACION de ver estado de habitacion: Cancelada / No cancelada
+
+                if (dto.StartDate < DateTime.Now)
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 400,
+                        Status = false,
+                        Message = "Error, la fecha inicial debe ser mayor o igual que la actual"
+                    };
+                }
+
+                if (dto.FinishDate < dto.StartDate)
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 400,
+                        Status = false,
+                        Message = "Error, la fecha inicial debe ser menor que la fecha final"
+                    };
+                }
+
+                if (!dto.RoomsList.Any())
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 400,
+                        Status = false,
+                        Message = "Error, debe enviar al menos una habitacion para crear la reserva"
+                    };
+                }
+
+                //Pasar el string del dto a Un guid Id
+                var roomIds = dto.RoomsList.Select(Guid.Parse).ToList();
+
+                //Estos son los registros que ya existian y se borraran de tabla RoomReservations
+                var existingRoomReservations = await _context.RoomReservations
+                    .Where(r => r.ReservationId == id)
+                    .ToListAsync();
+
+                //guardar id's de habitaciones de la reserva original
+                var originalRoomIds = existingRoomReservations.Select(r => r.RoomId).ToList();
+
+                //en base a las habitaciones de la reserva original verificar cuales son las nuevas habitaciones
+               var newRoomIds = roomIds.Except(originalRoomIds).ToList();
+
+                //determinar cuales son las habitaciones que deben removerse
+                var removedRoomIds = originalRoomIds.Except(roomIds).ToList();
+
+                //determinar habitaciones que aun quedan de la reserva original
+                var existingRoomIds = originalRoomIds.Except(removedRoomIds).ToList();
+
+                //union de las habitaciones que aun existen en la reservas mas las nuevas
+                var allRoomsIds = existingRoomIds.Concat(newRoomIds).ToList();
+
+                //verificar que las habitaciones de la nueva reserva existan
+                var roomsEntity = await _context.Rooms.Where(r => allRoomsIds.Contains(r.Id)).ToListAsync();
+
+                if (roomsEntity.Count != allRoomsIds.Count)
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 404,
+                        Status = false,
+                        Message = "Error, una o más habitaciones no existen"
+                    };
+                }
+
+                //verificar que las habitaciones sean del mismo hotel
+                var hotelId = roomsEntity.First().HotelId;
+
+                if (roomsEntity.Any(r => r.HotelId != hotelId))
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 400,
+                        Status = false,
+                        Message = "Error, todas las habitaciones deben pertenecer al mismo hotel"
+                    };
+                }
+
+                //validar que las habitaciones de la reserva no tengan otras reservas
+                //este metodo no es igual al de crear debido a la ultima condicion (...&& rr.Reservation.Id != id)
+                foreach (var room in roomsEntity)
+                {
+                    var overlappingReservations = await _context.RoomReservations
+                        .Where(rr => rr.RoomId == room.Id && rr.Reservation.FinishDate >= DateTime.Now && rr.Reservation.Id != id)
+                        .Select(rr => rr.Reservation)
+                        .Where(r => (dto.StartDate >= r.StartDate && dto.StartDate <= r.FinishDate) ||
+                                    (dto.FinishDate >= r.StartDate && dto.FinishDate <= r.FinishDate))
+                        .ToListAsync();
+
+                    if (overlappingReservations.Any())
+                    {
+                        return new ResponseDto<ReservationDto>
+                        {
+                            StatusCode = 400,
+                            Status = false,
+                            Message = $"Error, la habitacion {room.NumberRoom} no está disponible para las fechas seleccionadas"
+                        };
+                    }
+                }
+
+                //Pasar el string del dto a Un guid Id
+                var additionalServicesIds = dto.AdditionalServicesList.Select(Guid.Parse).ToList();
+
+                //Estos son los registros que ya existian y se borraran de tabla AdditionalServicesReservation
+                var existingAdditionalServicesReservations = await _context.AdditionalServiceReservations
+                    .Where(aS => aS.ReservationId == id)
+                    .ToListAsync();
+
+                //guardar id's de SA de la reserva original
+                var originalAdditionalServiceIds = existingAdditionalServicesReservations.Select(aS => aS.Id).ToList();
+
+                //en base a los SA de la reserva original verificar cuales son los nuevos SA
+                var newAdditionalServiceIds = additionalServicesIds.Except(originalAdditionalServiceIds).ToList();
+
+                //determinar cuales son los SA que deben removerse
+                var removeAdditionalServiceIds = originalAdditionalServiceIds.Except(additionalServicesIds).ToList();
+
+                //determinar SA que aun quedan de la reserva original
+                var existingAdditionalServiceIds = originalAdditionalServiceIds.Except(removeAdditionalServiceIds).ToList();
+
+                //union de las habitaciones que aun existen en la reservas mas las nuevas
+                var allAdditionalServiceIds = existingAdditionalServiceIds.Concat(newAdditionalServiceIds).ToList();
+
+                double additionalServicesTotal = 0;
+                var additionalServicesEntity = new List<AdditionalServiceEntity>();
+
+                //Calcular los dias que sera la reserva
+                var reservationDays = (dto.FinishDate - dto.StartDate).Days;
+                if (reservationDays <= 1)
+                {
+                    reservationDays = 1;
+                }
+
+                if (dto.AdditionalServicesList.Any() && dto.AdditionalServicesList != null)
+                {
+                    additionalServicesEntity = await _context.AdditionalServices
+                        .Where(aS => additionalServicesIds
+                        .Contains(aS.Id))
+                        .ToListAsync();
+
+                    if (additionalServicesEntity.Count != additionalServicesIds.Count)
+                    {
+                        return new ResponseDto<ReservationDto>
+                        {
+                            StatusCode = 404,
+                            Status = false,
+                            Message = "Error, uno o más servicios adicionales no existen"
+                        };
+
+                    }
+
+                    //Metodo implementando para verificar que los SA sean del mismoD hotel
+                    if (additionalServicesEntity.Any(aS => aS.HotelId != hotelId))
+                    {
+                        return new ResponseDto<ReservationDto>
+                        {
+                            StatusCode = 400,
+                            Status = false,
+                            Message = "Error, todos los servicios adicionales deben pertenecer al mismo hotel que las habitaciones seleccionadas"
+                        };
+                    }
+                    //Fin Metodo implementando para verificar que las SA sean del mismo hotel
+
+                    additionalServicesTotal = reservationDays * additionalServicesEntity.Sum(aS => aS.Price);
+                }
+
+                double roomsTotal = reservationDays * roomsEntity.Sum(r => r.PriceNight);
+                double totalAmount = roomsTotal + additionalServicesTotal;
+
+                //actualizar los datos de la reserva
+
+                reservationEntity.StartDate = dto.StartDate;
+                reservationEntity.FinishDate = dto.FinishDate;
+                reservationEntity.Condition = "CONFIRMADA";     //ESTE CAMPO DEBE ELIMINARSE CON LA FUTURA MIGRACION
+                reservationEntity.Price = totalAmount;  
+                reservationEntity.ClientId = _authService.GetUserId();
+
+                _context.Reservations.Update(reservationEntity);
+                await _context.SaveChangesAsync();
+
+                //Eliminar habitaciones de la antigua reservacion 
+                _context.RoomReservations.RemoveRange(existingRoomReservations);
+                await _context.SaveChangesAsync();
+
+                //Asignar las habitaciones con la reservacion en la tabla RoomReservations
+                var roomsReservationNew = allRoomsIds
+                    .Select(room => new RoomReservationEntity
+                    {
+                        ReservationId = reservationEntity.Id,
+                        RoomId = room
+                    })
+                    .ToList();
+
+                _context.RoomReservations.AddRange(roomsReservationNew);
+                await _context.SaveChangesAsync();
+
+                //Eliminar servicios adicionales de la antigua reservacion 
+                _context.AdditionalServiceReservations.RemoveRange(existingAdditionalServicesReservations);
+                await _context.SaveChangesAsync();
+
+                //Asignar las habitaciones con la reservacion en la tabla RoomReservations
+                var additionalServicesReservationNew = allAdditionalServiceIds
+                    .Select(aS => new AdditionalServiceReservationEntity
+                    {
+                        ReservationId = reservationEntity.Id,
+                        AdditionalServiceId = aS
+                    })
+                    .ToList();
+
+                _context.AdditionalServiceReservations.AddRange(additionalServicesReservationNew);
+                await _context.SaveChangesAsync();
+
+                //ERROR DE PRUEBA
+                //throw new Exception("Error para validar el rollback");
+                await transaction.CommitAsync();
+
+                //retornar respuesta
+                var reservationDto = new ReservationDto
+                {
+                    Id = reservationEntity.Id,
+                    StartDate = reservationEntity.StartDate,
+                    FinishDate = reservationEntity.FinishDate,
+                    Condition = reservationEntity.Condition,
+                    Price = reservationEntity.Price,
+                    ClientId = reservationEntity.ClientId,
+                    RoomsList = allRoomsIds.Select(id => id.ToString()).ToList(),
+                    AdditionalServicesList = allAdditionalServiceIds.Select(id => id.ToString()).ToList()
+                };
+
+                return new ResponseDto<ReservationDto>
+                {
+                    StatusCode = 200,
+                    Status = true,
+                    Message = "Reservacion editada correctamente",
+                    Data = reservationDto
+                };
+
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+
+                _logger.LogError(e, "Error al editar la reservacion");
+
+                return new ResponseDto<ReservationDto>
+                {
+                    StatusCode = 500,
+                    Status = false,
+                    Message = "Se produjo error al editar la reservacion"
+                };
+            }   //fin del catch
+        }   //fin del using
+    }   //fin de metodo EditReservationAsync
+
+
+
+    //AQUI SE TENDRIAN QUE COLOCAR LOS CODIGOS RECICLADOS 
 }

@@ -28,6 +28,46 @@ public class ReservationsService : IReservationsService
         this._authService = authService;
     }
 
+    public async Task<ResponseDto<ReservationDto>> GetReservationByIdAsync (Guid id)
+    {
+        var reservationEntity = await _context.Reservations
+            .Include(x => x.Rooms)
+            .ThenInclude(x => x.Room)
+            .Include(x => x.AdditionalServices)
+            .ThenInclude(x => x.AdditionalService)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if(reservationEntity == null)
+        {
+            return new ResponseDto<ReservationDto>
+            {
+                StatusCode = 404,
+                Status = false,
+                Message = $"La reservacion {id} no existe"
+            };
+        }
+
+        var reservationDto = new ReservationDto
+        {
+            Id = reservationEntity.Id,
+            StartDate = reservationEntity.StartDate,
+            FinishDate = reservationEntity.FinishDate,
+            Condition = reservationEntity.Condition,    //Esto debe eliminarse cuando se actualice base de datos
+            Price = reservationEntity.Price,
+            ClientId = reservationEntity.ClientId,
+            RoomsList = reservationEntity.Rooms.Select(x => x.RoomId.ToString()).ToList(),
+            AdditionalServicesList = reservationEntity.AdditionalServices.Select(x => x.AdditionalServiceId.ToString()).ToList(),
+        };
+
+        return new ResponseDto<ReservationDto>
+        {
+            StatusCode = 200,
+            Status = true,
+            Message = "Reservacion encontrado exitosamente",
+            Data = reservationDto
+        };
+    }
+
     public async Task<ResponseDto<ReservationDto>> CreateReservationAsync (ReservationCreateDto dto)
     {
         using(var transaction = await _context.Database.BeginTransactionAsync())

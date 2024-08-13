@@ -18,6 +18,18 @@ public class ReservationsController : ControllerBase
         this._reservationsService = reservationsService;
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ResponseDto<ReservationDto>>> GetOneById (Guid id)
+    {
+        var response = await _reservationsService.GetReservationByIdAsync(id);
+        return StatusCode(response.StatusCode, new
+        {
+            response.Status,
+            response.Message,
+            response.Data
+        });
+    }
+
     [HttpPost]
     public async Task<ActionResult<ResponseDto<ReservationDto>>> Create(ReservationCreateDto dto)
     {

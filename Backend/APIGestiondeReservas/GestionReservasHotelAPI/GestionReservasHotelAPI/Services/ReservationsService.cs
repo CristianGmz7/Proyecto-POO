@@ -90,7 +90,84 @@ public class ReservationsService : IReservationsService
 
     }
 
-    //crear otro metodo que obtenga lista de reservas por rangos de fechas
+    //metodo que obtiene lista de reservas por rango de fechas
+    public async Task<ResponseDto<PaginationDto<List<ReservationDto>>>> GetReservationListBetweenDates(
+        string clientId = "", int page = 1, DateTime filterStartDate = default, 
+        DateTime filterEndDate = default)
+    {
+
+        if(filterStartDate == default)
+        {
+            filterStartDate = DateTime.Now;
+        }
+        if(filterEndDate == default)
+        {
+            filterEndDate = DateTime.Now.AddDays(1);
+        }
+        if(filterEndDate < filterStartDate)
+        {
+            return new ResponseDto<PaginationDto<List<ReservationDto>>>
+            {
+                StatusCode = 404,
+                Status = false,
+                Message = "La fecha de fin del filtro debe ser mayor que la fecha de inicio de filtro"
+            };
+        }
+
+        clientId = _authService.GetUserId();
+
+        int startIndex = (page - 1) * PAGE_SIZE;
+
+        var resevartionEntityQuery = _context.Reservations
+            .Include(x => x.Rooms)
+            .ThenInclude(room => room.Room)
+            .Include(x => x.AdditionalServices)
+            .ThenInclude(aS => aS.AdditionalService)
+            .Where(reserv => reserv.ClientId == clientId && (
+                (reserv.StartDate >= filterStartDate && reserv.StartDate <= filterEndDate) &&
+                (reserv.FinishDate >= filterStartDate && reserv.FinishDate <= filterEndDate)
+            ));       //el operador && es en el primer caso que se planteó de la logica
+        
+        int totalReservations = await resevartionEntityQuery.CountAsync();
+        int totalPages = (int)Math.Ceiling((double)totalReservations / PAGE_SIZE);
+
+        var reservationsEntity = await resevartionEntityQuery
+            .OrderByDescending(x => x.FinishDate)
+            .Skip(startIndex)
+            .Take(PAGE_SIZE)
+            .ToListAsync();
+
+        var reservationsDto = reservationsEntity.Select(reservation => new ReservationDto
+        {
+            Id = reservation.Id,
+            StartDate = reservation.StartDate,
+            FinishDate = reservation.FinishDate,
+            Condition = reservation.Condition,  //esto debe eliminarse cuando se actualice la migracion
+                                                //porque va a calcularse cuando se 
+            Price = reservation.Price,
+            ClientId = clientId,
+            RoomsList = reservation.Rooms.Select(room => room.Id.ToString()).ToList(),
+            AdditionalServicesList = reservation.AdditionalServices.Select(aS => aS.Id.ToString()).ToList()
+        }
+        ).ToList();
+
+        return new ResponseDto<PaginationDto<List<ReservationDto>>>
+        {
+            StatusCode = 200,
+            Status = true,
+            Message = "Reservas encontradas exitosamente",
+            Data = new PaginationDto<List<ReservationDto>>
+            {
+                CurrentPage = page,
+                PageSize = PAGE_SIZE,
+                TotalItems = totalReservations,
+                TotalPages = totalPages,
+                Items = reservationsDto,
+                HasPreviousPage = page > 1,
+                HasNextPage = page < totalPages
+            }
+        };
+    }
 
     public async Task<ResponseDto<ReservationDto>> GetReservationByIdAsync (Guid id)
     {

@@ -32,6 +32,22 @@ public class ReservationsController : ControllerBase
         });
     }
 
+    [HttpGet("GetBetweenDates")]
+    public async Task<ActionResult<ResponseDto<PaginationDto<List<ReservationDto>>>>> PaginationListBetweenDates(
+        string clientId = "", int page = 1, 
+        DateTime filterStartDate = default, DateTime filterEndDate = default)
+    {
+        var response = await _reservationsService.GetReservationListBetweenDates(
+            clientId, page, filterStartDate, filterEndDate);
+
+        return StatusCode(response.StatusCode, new
+        {
+            response.Status,
+            response.Message,
+            response.Data
+        });
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ResponseDto<ReservationDto>>> GetOneById (Guid id)
     {

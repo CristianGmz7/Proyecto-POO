@@ -1,6 +1,7 @@
 ﻿namespace GestionReservasHotelAPI.Services.Interfaces
 {
-    public class IAuthService
+    public interface IAuthService
     {
+        string GetUserId();
     }
 }

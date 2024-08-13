@@ -1,0 +1,18 @@
+meta {
+  name: GetAllBetweenDatesReservPaginaListByClient
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{PATH}}/reservations/GetBetweenDates?clientId&page=1&filterStartDate=2024-08-15T16:25:12.044Z&filterEndDate=2024-08-25T16:25:12.044Z
+  body: none
+  auth: none
+}
+
+query {
+  clientId: 
+  page: 1
+  filterStartDate: 2024-08-15T16:25:12.044Z
+  filterEndDate: 2024-08-25T16:25:12.044Z
+}

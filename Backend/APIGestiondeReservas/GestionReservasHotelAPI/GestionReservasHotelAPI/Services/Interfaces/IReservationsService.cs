@@ -9,4 +9,5 @@ public interface IReservationsService
     Task<ResponseDto<ReservationDto>> DeleteReservationAsync(Guid id);
     Task<ResponseDto<ReservationDto>> EditReservationAsync(ReservationEditDto dto, Guid id);
     Task<ResponseDto<ReservationDto>> GetReservationByIdAsync(Guid id);
+    Task<ResponseDto<PaginationDto<List<ReservationDto>>>> GetReservationListAsync(string clientId = "", int page = 1);
 }

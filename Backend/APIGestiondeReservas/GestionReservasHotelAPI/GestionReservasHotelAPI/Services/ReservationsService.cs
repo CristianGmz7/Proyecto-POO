@@ -15,18 +15,82 @@ public class ReservationsService : IReservationsService
     private readonly IMapper _mapper;
     private readonly ILogger<ReservationsService> _logger;
     private readonly IAuthService _authService;
+    private readonly int PAGE_SIZE;
 
     public ReservationsService(GestionReservasHotelContext context, 
         IMapper mapper, 
         ILogger<ReservationsService> logger,
-        IAuthService authService
+        IAuthService authService,
+        IConfiguration configuration
         )
     {
         this._context = context;
         this._mapper = mapper;
         this._logger = logger;
         this._authService = authService;
+        PAGE_SIZE = configuration.GetValue<int>("Pagination:ReservationPageSize");
+
     }
+
+    //por el momento creo que no se necesita searchTerm
+    //supongo que se necesita string de id de cliente
+    public async Task<ResponseDto<PaginationDto<List<ReservationDto>>>> GetReservationListAsync(
+        string clientId = "", int page = 1)
+    {
+
+        clientId = _authService.GetUserId();        //esta de manera temporal mientras se agregan usuarios
+                                            //debe hacerse verificacion que el usuario exista
+        int startIndex = (page - 1) * PAGE_SIZE;
+        var reservationEntityQuery = _context.Reservations
+            .Include(x => x.Rooms)
+            .ThenInclude(room => room.Room)
+            .Include(x => x.AdditionalServices)
+            .ThenInclude(aS => aS.AdditionalService)
+            .Where(x => x.ClientId == clientId);
+
+        int totalReservations = await reservationEntityQuery.CountAsync();
+        int totalPages = (int)Math.Ceiling((double)totalReservations / PAGE_SIZE);
+
+        var reservationsEntity = await reservationEntityQuery
+            .OrderByDescending(x => x.FinishDate)
+            .Skip(startIndex)
+            .Take(PAGE_SIZE)
+            .ToListAsync();
+
+        var reservationsDto = reservationsEntity.Select(reservation => new ReservationDto
+        {
+            Id = reservation.Id,
+            StartDate = reservation.StartDate,
+            FinishDate = reservation.FinishDate,
+            Condition = reservation.Condition,  //esto debe eliminarse cuando se actualice la migracion
+                                                //porque va a calcularse cuando se haga la peticion
+            Price = reservation.Price,
+            ClientId = clientId,            //considerar si requiere porque ya se sabe que es del usuario
+            RoomsList = reservation.Rooms.Select(room => room.Id.ToString()).ToList(),
+            AdditionalServicesList = reservation.AdditionalServices.Select(aS => aS.Id.ToString()).ToList()
+        }
+        ).ToList();
+
+        return new ResponseDto<PaginationDto<List<ReservationDto>>>
+        {
+            StatusCode = 200,
+            Status = true,
+            Message = "Reservas encontradas exitosamente",
+            Data = new PaginationDto<List<ReservationDto>>
+            {
+                CurrentPage = page,
+                PageSize = PAGE_SIZE,
+                TotalItems = totalReservations,
+                TotalPages = totalPages,
+                Items = reservationsDto,
+                HasPreviousPage = page > 1,
+                HasNextPage = page < totalPages,
+            }
+        };
+
+    }
+
+    //crear otro metodo que obtenga lista de reservas por rangos de fechas
 
     public async Task<ResponseDto<ReservationDto>> GetReservationByIdAsync (Guid id)
     {
@@ -52,7 +116,8 @@ public class ReservationsService : IReservationsService
             Id = reservationEntity.Id,
             StartDate = reservationEntity.StartDate,
             FinishDate = reservationEntity.FinishDate,
-            Condition = reservationEntity.Condition,    //Esto debe eliminarse cuando se actualice base de datos
+            Condition = reservationEntity.Condition,    //Esto debe eliminarse cuando se actualice base de datos,
+                                                        //esta condicion se debe calcular cuando se haga la peticion
             Price = reservationEntity.Price,
             ClientId = reservationEntity.ClientId,
             RoomsList = reservationEntity.Rooms.Select(x => x.RoomId.ToString()).ToList(),

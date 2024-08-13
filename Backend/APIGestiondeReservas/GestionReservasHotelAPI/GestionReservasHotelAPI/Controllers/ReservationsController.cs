@@ -18,6 +18,20 @@ public class ReservationsController : ControllerBase
         this._reservationsService = reservationsService;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<ResponseDto<PaginationDto<List<ReservationDto>>>>> PaginationList(
+        string clientId = "", int page = 1)
+    {
+        var response = await _reservationsService.GetReservationListAsync(clientId, page);
+
+        return StatusCode(response.StatusCode, new
+        {
+            response.Status,
+            response.Message,
+            response.Data
+        });
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ResponseDto<ReservationDto>>> GetOneById (Guid id)
     {

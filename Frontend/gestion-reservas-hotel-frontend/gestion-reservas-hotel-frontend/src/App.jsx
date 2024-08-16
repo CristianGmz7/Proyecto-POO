@@ -1,8 +1,10 @@
 // import { BrowserRouter } from "react-router-dom";
 // import { AppRouter } from "./routes/AppRouter";
 import {RoomList} from "./features/client/pages"
+import {HomePage} from "./features/client/pages"
 import {Nav} from "./features/client/components"
 import {SideBar} from "./features/client/components"
+import { Footer } from "./features/client/components";
 
 export const App = () => {
   return (
@@ -14,10 +16,11 @@ export const App = () => {
       <div className="flex">
         <SideBar />
         <div className="flex-1 ml-14 md:ml-48">
-          <RoomList />
+          <HomePage/>
+          {/* <RoomList /> */}
         </div>
       </div>
-      {/* Footer */}
+      <Footer/>
     </>
   );
 };

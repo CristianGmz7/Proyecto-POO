@@ -1,11 +1,10 @@
 import { Route, Routes } from "react-router-dom"
-
+import { ClientRouter } from "../features/client/routes/ClientRouter"
 
 export const AppRouter = () => {
   return (
     <Routes>
-        <Route path="*"></Route>
-        {/* falta colocar element */}
+      <Route path="*" element={<ClientRouter />} />
     </Routes>
   )
 }

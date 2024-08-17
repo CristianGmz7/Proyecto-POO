@@ -21,9 +21,9 @@ public class RoomCreateDto
     [Required(ErrorMessage = "El {0} es obligatorio")]
     public double PriceNight { get; set; }
 
-    [Display(Name = "Estado")]
-    [RegularExpression("^(DISPONIBLE|EN MANTENIMIENTO)$", ErrorMessage = "El {0} solo puede ser 'DISPONIBLE', 'EN MANTENIMIENTO'")]
-    public string Condition { get; set; }
+    [Display(Name = "url de la imagen")]
+    [Required(ErrorMessage = "La {0} es obligatoria")]
+    public string ImageUrl { get; set; }
 
     public Guid HotelId { get; set; }
 

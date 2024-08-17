@@ -10,7 +10,7 @@ public class HotelEntity : BaseEntity
     [Column("name")]
     public string Name { get; set; }
 
-    [StringLength(200)]
+    [StringLength(100)]
     [Column("address")]
     public string Address { get; set; }
 
@@ -18,7 +18,18 @@ public class HotelEntity : BaseEntity
     [Column("stars_michelin")]
     public int StarsMichelin { get; set; }
 
-    [RegularExpression("^[0-9]{8}$")]       //ojo con esta validacion
+    [RegularExpression("^[0-9]{8}$")]       
     [Column("number_phone")]
     public int NumberPhone { get; set; }
+
+    [StringLength(100)]
+    [Column("overview")]
+    public string Overview { get; set; }
+
+    [StringLength(500)]
+    [Column("description")]
+    public string Description { get; set; }
+
+    [Column("image_url")]
+    public string ImageUrl { get; set; }
 }

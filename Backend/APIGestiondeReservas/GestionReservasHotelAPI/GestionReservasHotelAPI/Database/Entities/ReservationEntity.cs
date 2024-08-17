@@ -12,10 +12,6 @@ public class ReservationEntity : BaseEntity
     [Column("finish_date")]
     public DateTime FinishDate { get; set; }
 
-    [RegularExpression("^(CONFIRMADA|CANCELADA|COMPLETADA)$")]
-    [Column("condition")]
-    public string Condition { get; set; }
-
     [Range(1, double.MaxValue)]
     [Column("price")]
     public double Price { get; set; }

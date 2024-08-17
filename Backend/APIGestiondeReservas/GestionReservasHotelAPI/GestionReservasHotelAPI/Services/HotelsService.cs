@@ -12,25 +12,54 @@ namespace GestionReservasHotelAPI.Services
     {
         private readonly GestionReservasHotelContext _context;
         private readonly IMapper _mapper;
+        private readonly int PAGE_SIZE;
 
-        public HotelsService(GestionReservasHotelContext context, IMapper mapper) 
+        public HotelsService(GestionReservasHotelContext context, 
+            IMapper mapper,
+            IConfiguration configuration) 
         {
             this._context = context;
             this._mapper = mapper;
+            PAGE_SIZE = configuration.GetValue<int>("Pagination:HotelPageSize");
         }
 
-        public async Task<ResponseDto<List<HotelDto>>> GetHotelsListAsync()
+        public async Task<ResponseDto<PaginationDto<List<HotelDto>>>> GetHotelsListAsync(
+            int page = 1)
         {
-            var hotelsEntity = await _context.Hotels.ToListAsync();
+            int startIndex = (page - 1) * PAGE_SIZE;
+
+            //validacion falsa para que todso los hoteles los pase al Query
+            var hotelEntityQuery = _context.Hotels
+                .Where(x => x.Id == x.Id);
+
+            int totalHotels = await hotelEntityQuery.CountAsync();
+
+            int totalPages = (int)Math.Ceiling((double)totalHotels / PAGE_SIZE);
+
+            //¿Que factor usar de filtro como ordenamiento?
+            var hotelsEntity = await _context.Hotels
+                .OrderBy(x => x.Name)
+                .Skip(startIndex)
+                .Take(PAGE_SIZE)
+                .ToListAsync();
 
             var hotelsDtos = _mapper.Map<List<HotelDto>>(hotelsEntity);
 
-            return new ResponseDto<List<HotelDto>>
+            return new ResponseDto<PaginationDto<List<HotelDto>>>
             {
                 StatusCode = 200,
                 Status = true,
                 Message = "Lista de registro obtenida correctamente.",
-                Data = hotelsDtos
+                Data = new PaginationDto<List<HotelDto>>
+                {
+                    CurrentPage = page,
+                    PageSize = PAGE_SIZE,
+                    TotalItems = totalHotels,
+                    TotalPages = totalPages,
+                    Items = hotelsDtos,
+                    HasPreviousPage = page > 1,
+                    HasNextPage = page < totalPages,
+                }
             };
         }
 

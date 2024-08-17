@@ -7,6 +7,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Button } from "@mui/material";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export const RoomList = () => {
 
@@ -59,10 +60,10 @@ export const RoomList = () => {
         {/* Inicio de div información hotel y campos de check-in y check-out*/}
         <div className="flex flex-col gap-4">
           {/* Nombre del hotel */}
-          <h2 className="text-2xl font-bold tracking-tight">Hotel Brisa Marina</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Hotel Century</h2>
           {/* Descripción del hotel */}
           <p className="text-muted-foreground">
-            Hotel Brisa Marina es un hotel cómodo en precio y hospitalidad
+            Hotel Century es un hotel cómodo en precio y hospitalidad
             que cuenta con un clima agradable, unas hermosas vistas a la playa 
             entre otras muchas características especiales que lo convierten en 
             la mejor opción para reservar en el hotel.
@@ -138,6 +139,9 @@ export const RoomList = () => {
         {/* Inicio Botón implementado cuando se selecciona habitaciones */}
         {selectedRooms.length > 0 && (
           <div className="mt-8">
+            <Link
+            to={"/ReservationList/0f529c92-2d29-41a3-957a-e3601d0c77c9"}
+            >
             <Button 
               variant="contained" 
               color="warning"
@@ -145,7 +149,8 @@ export const RoomList = () => {
             >
               Ver Reserva
             </Button>
-          </div>
+            </Link>
+        </div>
         )}
         {/* Fin Botón implementado cuando se selecciona habitaciones */}
       </div>

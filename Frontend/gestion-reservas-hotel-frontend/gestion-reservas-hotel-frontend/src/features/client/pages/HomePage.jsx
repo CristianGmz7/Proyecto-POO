@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export const HomePage = () => {
   return (
     <div className="bg-background text-foreground">
@@ -25,14 +27,14 @@ export const HomePage = () => {
                 </div>
               </div>
               <p>Disfruta de una estancia relajante en nuestro hotel con vistas a la playa.</p>
-              <a 
-                href="#"
-               className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-purple-600 text-white 
+              <Link 
+                to = "/roomList/bc41c7dc-97cc-4054-a1e7-7e97768719d9"
+               className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-blue-600 text-white 
                font-medium transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600
                 focus:ring-offset-2"
               >
                 Ver habitaciones
-              </a>
+              </Link>
             </div>
           </div>
           {/* Fin primer hotel */}
@@ -57,14 +59,14 @@ export const HomePage = () => {
                 </div>
               </div>
               <p>Relájate en nuestro resort de lujo con piscina y spa.</p>
-              <a 
-                href="#"
-                className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-purple-600
+              <Link 
+                to = "/roomList/bc41c7dc-97cc-4054-a1e7-7e97768719d9"
+                className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-blue-600
                  text-white font-medium transition-colors hover:bg-purple-700 focus:outline-none 
                  focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
               >
                 Ver habitaciones
-              </a>
+              </Link>
             </div>
           </div>
           {/* Fin segundo hotel */}
@@ -89,14 +91,14 @@ export const HomePage = () => {
                 </div>
               </div>
               <p>Disfruta de unas vacaciones en nuestro hotel con vistas panorámicas.</p>
-              <a 
-                href="#"
-                className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-purple-600
+              <Link 
+                to = "/roomList/bc41c7dc-97cc-4054-a1e7-7e97768719d9"
+                className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-blue-600
                 text-white font-medium transition-colors hover:bg-purple-700 focus:outline-none 
                 focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
               >
                 Ver habitaciones
-              </a>
+              </Link>
             </div>
           </div>
           {/* Fin tercer hotel */}
@@ -112,7 +114,7 @@ export const HomePage = () => {
             </p>
             <a 
               href="#"
-              className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-purple-600 
+              className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-blue-600 
               text-white font-medium transition-colors hover:bg-purple-700 focus:outline-none 
               focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
             >
@@ -126,7 +128,7 @@ export const HomePage = () => {
             </p>
             <a 
               href="#"
-             className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-purple-600 
+             className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-blue-600 
              text-white font-medium transition-colors hover:bg-purple-700 focus:outline-none 
              focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
             >
@@ -140,7 +142,7 @@ export const HomePage = () => {
             </p>
             <a 
               href="#"
-              className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-purple-600 
+              className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-blue-600 
               text-white font-medium transition-colors hover:bg-purple-700 focus:outline-none 
               focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
             >

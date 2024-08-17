@@ -16,8 +16,8 @@ export const App = () => {
       <div className="flex">
         <SideBar />
         <div className="flex-1 ml-14 md:ml-48">
-          <HomePage/>
-          {/* <RoomList /> */}
+          {/* <HomePage/> */}
+          <RoomList />
         </div>
       </div>
       <Footer/>

@@ -3,6 +3,8 @@ using Azure;
 using GestionReservasHotelAPI.Database;
 using GestionReservasHotelAPI.Database.Entities;
 using GestionReservasHotelAPI.Dtos.Common;
+using GestionReservasHotelAPI.Dtos.Hotels;
+using GestionReservasHotelAPI.Dtos.Reservations;
 using GestionReservasHotelAPI.Dtos.Rooms;
 using GestionReservasHotelAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -13,20 +15,45 @@ public class RoomsService : IRoomsService
 {
     private readonly GestionReservasHotelContext _context;
     private readonly IMapper _mapper;
+    private readonly int PAGE_SIZE;
 
-    public RoomsService(GestionReservasHotelContext context, IMapper mapper)
+    public RoomsService(
+        GestionReservasHotelContext context, 
+        IMapper mapper,
+        IConfiguration configuration
+        )
     {
         this._context = context;
         this._mapper = mapper;
+        PAGE_SIZE = configuration.GetValue<int>("Pagination:RoomPageSize");
     }
 
+    //Este servicio no se utiliza aun en el frontend
+    //mapeo actualizado
     public async Task<ResponseDto<List<RoomDto>>> GetRoomsListAsync()
     {
         var roomsEntity = await _context.Rooms.ToListAsync();
 
         //el tipo sera List<RoomDto> y se convertira de RoomEntity que es la variable roomsEntity
         //verificar si para este caso es necesario descomentar el Id del Hotel del Dto
-        var roomsDto = _mapper.Map<List<RoomDto>>(roomsEntity);
+        //var roomsDto = _mapper.Map<List<RoomDto>>(roomsEntity);
+        var roomsDto = roomsEntity.Select(room => new RoomDto
+        {
+            Id = room.Id,
+            NumberRoom = room.NumberRoom,
+            TypeRoom = room.TypeRoom,
+            PriceNight = room.PriceNight,
+            ImageUrl = room.ImageUrl,
+            //este campo tiene virtual en el entity pero en el examen no
+            HotelInfo = new HotelDto
+            {
+                //estos son los campos que se necesitan para el frontend
+                Id = room.Hotel.Id,
+                Name = room.Hotel.Name,
+                Description = room.Hotel.Description,
+                ImageUrl = room.Hotel.ImageUrl
+            }
+        }).ToList();
 
         return new ResponseDto<List<RoomDto>>
         {
@@ -37,44 +64,110 @@ public class RoomsService : IRoomsService
         };
     }
 
-    //metodo obtener todas las habitaciones de un hotel
-    public async Task<ResponseDto<List<RoomDto>>> GetRoomsOneHotelAsync(Guid id)
+    //metodo obtener todas las habitaciones de un hotel, este se utiliza en el frontend
+    //el id del hotel, el numero de pagina y las fechas de inicio y fin
+    public async Task<ResponseDto<PaginationDto<List<RoomDto>>>> GetRoomsOneHotelAsync(
+        Guid id, int page = 1,
+        DateTime filterStartDate = default, DateTime filterEndDate = default)
     {
+        if (filterStartDate == default)
+        {
+            filterStartDate = DateTime.Now;
+        }
+        if (filterEndDate == default)
+        {
+            filterEndDate = DateTime.Now.AddDays(1);
+        }
+        if (filterEndDate < filterStartDate)
+        {
+            return new ResponseDto<PaginationDto<List<RoomDto>>>
+            {
+                StatusCode = 404,
+                Status = false,
+                Message = "La fecha de fin del filtro debe ser mayor que la fecha de inicio de filtro"
+            };
+        }
         var hotelEntity = await _context.Hotels.FindAsync(id);
 
         if(hotelEntity == null)
         {
-            return new ResponseDto<List<RoomDto>>
+            return new ResponseDto<PaginationDto<List<RoomDto>>>
             {
                 StatusCode = 404,
                 Status = false,
                 Message = "El hotel no existe"
             };
         }
+        
+        int startIndex = (page - 1) * PAGE_SIZE;
 
-        var roomsEntity = await _context.Rooms.ToListAsync();
-        var roomsOfHotel = new List<RoomEntity> { };
+        //AQUI TENGO UN DILEMA CON EL FRONTEND: El Query sera estatico o se ira actualizando
+        //cuando se le filtrar y haya nuevo rango de fechas
 
-        foreach (var room in roomsEntity)
+        var roomEntityQuery = _context.Rooms
+            .Include(x => x.Hotel)
+            .Include(x => x.Reservations)
+            .ThenInclude(x => x.Reservation)
+            //verificar que la room sea del hotel y que no tenga reservas para las fechas ingresadas
+            //verificar bien la parte del Where y !room.Reservation.Any
+            .Where(room => room.HotelId == id && (
+                !room.Reservations.Any(rr => 
+                    rr.Reservation.StartDate < filterEndDate &&
+                    rr.Reservation.FinishDate > filterStartDate)
+            ));
+
+        int totalRooms = await roomEntityQuery.CountAsync();
+
+        int totalPages = (int)Math.Ceiling((double)totalRooms);
+
+        var roomsEntity = await roomEntityQuery
+            .OrderByDescending(x => x.NumberRoom)
+            .Skip(startIndex)
+            .Take(PAGE_SIZE)
+            .ToListAsync();
+
+        //EL MAPEO HACERLO MANUAL PORQUE SE DEBE INCLUIR CAMPO DEL NOMBRE DEL HOTEL Y DESCRIPCION
+        //HACER EL MAPEO MANUAL POR EL CASO DE LAS HABITACIONES
+        var roomsDto = roomsEntity.Select(room => new RoomDto
         {
-            if(room.HotelId == hotelEntity.Id)
+            Id = room.Id,
+            NumberRoom = room.NumberRoom,
+            TypeRoom = room.TypeRoom,
+            PriceNight = room.PriceNight,
+            ImageUrl = room.ImageUrl,
+            //este campo tiene virtual en el entity pero en el examen no
+            HotelInfo = new HotelDto
             {
-                roomsOfHotel.Add(room);
+                //estos son los campos que se necesitan para el frontend
+                Id = room.Hotel.Id,
+                Name = room.Hotel.Name,
+                Description = room.Hotel.Description,
+                ImageUrl = room.Hotel.ImageUrl
             }
         }
+        ).ToList();
 
-        var roomsDto = _mapper.Map<List<RoomDto>>(roomsOfHotel);
-
-        return new ResponseDto<List<RoomDto>>
+        return new ResponseDto<PaginationDto<List<RoomDto>>>
         {
             StatusCode = 200,
             Status = true,
             Message = "Registros encontrados correctamente",
-            Data = roomsDto
+            Data = new PaginationDto<List<RoomDto>>
+            {
+                CurrentPage = page,
+                PageSize = PAGE_SIZE,
+                TotalItems = totalRooms,
+                TotalPages = totalPages,
+                Items = roomsDto,
+                HasPreviousPage = page > 1,
+                HasNextPage = page < totalPages,
+
+            }
         };
 
     }
 
+    //Ojo con los includes
     public async Task<ResponseDto<RoomDto>> GetRoomById(Guid id)
     {
         var roomEntity = await _context.Rooms.FindAsync(id);
@@ -89,7 +182,25 @@ public class RoomsService : IRoomsService
             };
         }
 
-        var roomDto = _mapper.Map<RoomDto>(roomEntity);
+        //var roomDto = _mapper.Map<RoomDto>(roomEntity);
+        //hacer mapeo manualmente
+        var roomDto = new RoomDto
+        {
+            Id = roomEntity.Id,
+            NumberRoom = roomEntity.NumberRoom,
+            TypeRoom = roomEntity.TypeRoom,
+            PriceNight = roomEntity.PriceNight,
+            ImageUrl = roomEntity.ImageUrl,
+
+            HotelInfo = new HotelDto
+            {
+                //estos son los campos que se necesitan para el frontend
+                Id = roomEntity.Hotel.Id,
+                Name = roomEntity.Hotel.Name,
+                Description = roomEntity.Hotel.Description,
+                ImageUrl = roomEntity.Hotel.ImageUrl
+            }
+        };
 
         return new ResponseDto<RoomDto>
         {
@@ -132,7 +243,23 @@ public class RoomsService : IRoomsService
         _context.Rooms.Add(roomEntity);
         await _context.SaveChangesAsync();
 
-        var roomDto = _mapper.Map<RoomDto>(roomEntity);
+        var roomDto = new RoomDto
+        {
+            Id = roomEntity.Id,
+            NumberRoom = roomEntity.NumberRoom,
+            TypeRoom = roomEntity.TypeRoom,
+            PriceNight = roomEntity.PriceNight,
+            ImageUrl = roomEntity.ImageUrl,
+
+            HotelInfo = new HotelDto
+            {
+                //estos son los campos que se necesitan para el frontend
+                Id = roomEntity.Hotel.Id,
+                Name = roomEntity.Hotel.Name,
+                Description = roomEntity.Hotel.Description,
+                ImageUrl = roomEntity.Hotel.ImageUrl
+            }
+        };
 
         return new ResponseDto<RoomDto>
         {
@@ -177,7 +304,23 @@ public class RoomsService : IRoomsService
         _context.Rooms.Update(roomEntity);
         await _context.SaveChangesAsync();
 
-        var roomDto = _mapper.Map<RoomDto>(roomEntity);
+        var roomDto = new RoomDto
+        {
+            Id = roomEntity.Id,
+            NumberRoom = roomEntity.NumberRoom,
+            TypeRoom = roomEntity.TypeRoom,
+            PriceNight = roomEntity.PriceNight,
+            ImageUrl = roomEntity.ImageUrl,
+
+            HotelInfo = new HotelDto
+            {
+                //estos son los campos que se necesitan para el frontend
+                Id = roomEntity.Hotel.Id,
+                Name = roomEntity.Hotel.Name,
+                Description = roomEntity.Hotel.Description,
+                ImageUrl = roomEntity.Hotel.ImageUrl
+            }
+        };
 
         return new ResponseDto<RoomDto>
         {

@@ -13,5 +13,11 @@ namespace GestionReservasHotelAPI.Dtos.Hotels
         public int StarsMichelin { get; set; }
         
         public int NumberPhone { get; set; }
+
+        public string Overview { get; set; }
+
+        public string Description { get; set; }
+
+        public string ImageUrl { get; set; }
     }
 }

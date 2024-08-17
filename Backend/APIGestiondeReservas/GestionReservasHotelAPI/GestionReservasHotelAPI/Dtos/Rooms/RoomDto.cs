@@ -12,11 +12,15 @@ public class RoomDto
 
     public double PriceNight { get; set; }
 
+    //public Guid HotelId { get; set; } ya no se necesita creo, porque viene el Dto
+
+    public string ImageUrl { get; set; }
+
+    public HotelDto HotelInfo { get; set; }
+
+    //Esta se utilizará cuando los administradores hagan peticion obtener todas habitaciones
     public string Condition { get; set; }
 
-    public Guid HotelId { get; set; }     
-    
-    //(solo necesito ver el Id del hotel al que pertenece el hotel, no toda su info)
     //(no necesito ver por el momento las reservaciones que tenga)
 
 }

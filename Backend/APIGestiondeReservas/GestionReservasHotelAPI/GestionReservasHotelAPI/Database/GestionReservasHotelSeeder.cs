@@ -15,10 +15,10 @@ namespace GestionReservasHotelAPI.Database
             {
                 await LoadHotelsAsync(loggerFactory, context);
                 await LoadRoomsAsync(loggerFactory, context);
-                await LoadReservationsAsync(loggerFactory, context);
+                //await LoadReservationsAsync(loggerFactory, context);
                 await LoadAdditionalsServicesAsync(loggerFactory, context);
-                await LoadRoomsReservationsAsync(loggerFactory, context);
-                await LoadAdditionalsServicesReservationsAsync(loggerFactory, context);
+                //await LoadRoomsReservationsAsync(loggerFactory, context);
+                //await LoadAdditionalsServicesReservationsAsync(loggerFactory, context);
             }
             catch (Exception e)
             {

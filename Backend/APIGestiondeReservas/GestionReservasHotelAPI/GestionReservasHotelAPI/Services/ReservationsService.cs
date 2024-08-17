@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
 using GestionReservasHotelAPI.Database;
 using GestionReservasHotelAPI.Database.Entities;
+using GestionReservasHotelAPI.Dtos.AdditionalServices;
 using GestionReservasHotelAPI.Dtos.Common;
+using GestionReservasHotelAPI.Dtos.Hotels;
 using GestionReservasHotelAPI.Dtos.Reservations;
+using GestionReservasHotelAPI.Dtos.Rooms;
 using GestionReservasHotelAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -32,8 +35,9 @@ public class ReservationsService : IReservationsService
 
     }
 
-    //por el momento creo que no se necesita searchTerm
     //supongo que se necesita string de id de cliente
+    //Este metodo se implementará en SideBar Ver Reservas Hechas. NO ES el que se muestra
+    //cuando selecciona habitaciones y le da confirmar
     public async Task<ResponseDto<PaginationDto<List<ReservationDto>>>> GetReservationListAsync(
         string clientId = "", int page = 1)
     {
@@ -43,9 +47,10 @@ public class ReservationsService : IReservationsService
         int startIndex = (page - 1) * PAGE_SIZE;
         var reservationEntityQuery = _context.Reservations
             .Include(x => x.Rooms)
-            .ThenInclude(room => room.Room)
+                .ThenInclude(room => room.Room)
+                    .ThenInclude(room => room.Hotel)        //añadido para acceder props del Hotel
             .Include(x => x.AdditionalServices)
-            .ThenInclude(aS => aS.AdditionalService)
+                .ThenInclude(aS => aS.AdditionalService)
             .Where(x => x.ClientId == clientId);
 
         int totalReservations = await reservationEntityQuery.CountAsync();
@@ -62,12 +67,31 @@ public class ReservationsService : IReservationsService
             Id = reservation.Id,
             StartDate = reservation.StartDate,
             FinishDate = reservation.FinishDate,
-            Condition = reservation.Condition,  //esto debe eliminarse cuando se actualice la migracion
-                                                //porque va a calcularse cuando se haga la peticion
+            //DEBE DE CALCULARSE LA CONDICIÓN DE LA RESERVA EN BASE A LA FECHA ACTUAL Y FECHA FINAL
+            Condition = DateTime.Now < reservation.FinishDate ? "CONFIRMADA" : "COMPLETADA",
             Price = reservation.Price,
             ClientId = clientId,            //considerar si requiere porque ya se sabe que es del usuario
-            RoomsList = reservation.Rooms.Select(room => room.Id.ToString()).ToList(),
-            AdditionalServicesList = reservation.AdditionalServices.Select(aS => aS.Id.ToString()).ToList()
+            
+            RoomsInfoList = reservation.Rooms.Select(rR => new RoomDto
+            {
+                //estos son los campos que se necesitan para el frontend
+                Id = rR.Room.Id,
+                NumberRoom = rR.Room.NumberRoom,
+                TypeRoom = rR.Room.TypeRoom,
+                PriceNight = rR.Room.PriceNight,
+                ImageUrl = rR.Room.ImageUrl,
+                HotelInfo = new HotelDto
+                {
+                    Id = rR.Room.Hotel.Id,
+                    Name = rR.Room.Hotel.Name
+                }
+            }).ToList(),
+            AdditionalServicesInfoList = reservation.AdditionalServices.Select(aS => new AdditionalServiceDto
+            {
+                Id = aS.AdditionalService.Id,
+                Name = aS.AdditionalService.Name,
+                Price = aS.AdditionalService.Price,
+            }).ToList()
         }
         ).ToList();
 
@@ -91,6 +115,7 @@ public class ReservationsService : IReservationsService
     }
 
     //metodo que obtiene lista de reservas por rango de fechas
+    //este metodo será implementando posteriormente
     public async Task<ResponseDto<PaginationDto<List<ReservationDto>>>> GetReservationListBetweenDates(
         string clientId = "", int page = 1, DateTime filterStartDate = default, 
         DateTime filterEndDate = default)
@@ -118,11 +143,15 @@ public class ReservationsService : IReservationsService
 
         int startIndex = (page - 1) * PAGE_SIZE;
 
+        //AQUI TENGO UN DILEMA CON EL FRONTEND: El Query sera estatico o se ira actualizando
+        //cuando se le filtrar y haya nuevo rango de fechas
+
         var resevartionEntityQuery = _context.Reservations
             .Include(x => x.Rooms)
-            .ThenInclude(room => room.Room)
+                .ThenInclude(room => room.Room)
+                    .ThenInclude(room => room.Hotel)
             .Include(x => x.AdditionalServices)
-            .ThenInclude(aS => aS.AdditionalService)
+                .ThenInclude(aS => aS.AdditionalService)
             .Where(reserv => reserv.ClientId == clientId && (
                 (reserv.StartDate >= filterStartDate && reserv.StartDate <= filterEndDate) &&
                 (reserv.FinishDate >= filterStartDate && reserv.FinishDate <= filterEndDate)
@@ -142,12 +171,31 @@ public class ReservationsService : IReservationsService
             Id = reservation.Id,
             StartDate = reservation.StartDate,
             FinishDate = reservation.FinishDate,
-            Condition = reservation.Condition,  //esto debe eliminarse cuando se actualice la migracion
-                                                //porque va a calcularse cuando se 
+            Condition = DateTime.Now < reservation.FinishDate ? "CONFIRMADA" : "COMPLETADA",
             Price = reservation.Price,
             ClientId = clientId,
-            RoomsList = reservation.Rooms.Select(room => room.Id.ToString()).ToList(),
-            AdditionalServicesList = reservation.AdditionalServices.Select(aS => aS.Id.ToString()).ToList()
+
+            RoomsInfoList = reservation.Rooms.Select(rR => new RoomDto
+            {
+                //estos son los campos que se necesitan para el frontend
+                Id = rR.Room.Id,
+                NumberRoom = rR.Room.NumberRoom,
+                TypeRoom = rR.Room.TypeRoom,
+                PriceNight = rR.Room.PriceNight,
+                ImageUrl = rR.Room.ImageUrl,
+                HotelInfo = new HotelDto
+                {
+                    Id = rR.Room.Hotel.Id,
+                    Name = rR.Room.Hotel.Name
+                }
+            }).ToList(),
+            AdditionalServicesInfoList = reservation.AdditionalServices.Select(aS => new AdditionalServiceDto
+            {
+                Id = aS.AdditionalService.Id,
+                Name = aS.AdditionalService.Name,
+                Price = aS.AdditionalService.Price,
+            }).ToList()
+
         }
         ).ToList();
 
@@ -169,13 +217,15 @@ public class ReservationsService : IReservationsService
         };
     }
 
+    //DTO de respuesta actualizado
     public async Task<ResponseDto<ReservationDto>> GetReservationByIdAsync (Guid id)
     {
         var reservationEntity = await _context.Reservations
             .Include(x => x.Rooms)
-            .ThenInclude(x => x.Room)
+                .ThenInclude(x => x.Room)
+                    .ThenInclude(room => room.Hotel)
             .Include(x => x.AdditionalServices)
-            .ThenInclude(x => x.AdditionalService)
+                .ThenInclude(x => x.AdditionalService)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if(reservationEntity == null)
@@ -193,12 +243,30 @@ public class ReservationsService : IReservationsService
             Id = reservationEntity.Id,
             StartDate = reservationEntity.StartDate,
             FinishDate = reservationEntity.FinishDate,
-            Condition = reservationEntity.Condition,    //Esto debe eliminarse cuando se actualice base de datos,
-                                                        //esta condicion se debe calcular cuando se haga la peticion
+            //DEBE DE CALCULARSE LA CONDICIÓN DE LA RESERVA EN BASE A LA FECHA ACTUAL Y FECHA FINAL
+            Condition = DateTime.Now < reservationEntity.FinishDate ? "CONFIRMADA" : "COMPLETADA",
             Price = reservationEntity.Price,
             ClientId = reservationEntity.ClientId,
-            RoomsList = reservationEntity.Rooms.Select(x => x.RoomId.ToString()).ToList(),
-            AdditionalServicesList = reservationEntity.AdditionalServices.Select(x => x.AdditionalServiceId.ToString()).ToList(),
+
+            RoomsInfoList = reservationEntity.Rooms.Select(rR => new RoomDto
+            {
+                Id = rR.Room.Id,
+                NumberRoom = rR.Room.NumberRoom,
+                TypeRoom = rR.Room.TypeRoom,
+                PriceNight = rR.Room.PriceNight,
+                ImageUrl = rR.Room.ImageUrl,
+                HotelInfo = new HotelDto
+                {
+                    Id = rR.Room.Hotel.Id,
+                    Name = rR.Room.Hotel.Name
+                }
+            }).ToList(),
+            AdditionalServicesInfoList = reservationEntity.AdditionalServices.Select(aS => new AdditionalServiceDto
+            {
+                Id = aS.AdditionalService.Id,
+                Name = aS.AdditionalService.Name,
+                Price = aS.AdditionalService.Price,
+            }).ToList()
         };
 
         return new ResponseDto<ReservationDto>
@@ -216,7 +284,8 @@ public class ReservationsService : IReservationsService
         {
             try
             {
-                if(dto.StartDate < DateTime.Now)
+                //posible solucion si llega a dar problemas, validar solo las fechas sin tomar en cuenta la hora
+                if (dto.StartDate < DateTime.Now)
                 {
                     return new ResponseDto<ReservationDto>
                     {
@@ -323,7 +392,7 @@ public class ReservationsService : IReservationsService
 
                     }
 
-                    //Metodo implementando para verificar que los SA sean del mismoD hotel
+                    //Metodo implementando para verificar que los SA sean del mismo hotel
                     if (additionalServicesEntity.Any(aS => aS.HotelId != hotelId))
                     {
                         return new ResponseDto<ReservationDto>
@@ -348,8 +417,7 @@ public class ReservationsService : IReservationsService
                 {
                     StartDate = dto.StartDate,
                     FinishDate = dto.FinishDate,
-                    //ClientId = dto.ClientId,      //se coloca antes de guardarlo en la tabla
-                    Condition = "CONFIRMADA",       //ESTE CAMPO DEBE ELIMINARSE CON LA FUTURA MIGRACION
+                    //Estado de reserva / Condition se elimino
                     Price = totalAmount,
                     //Los List IEnumerable no se colocan
                 };
@@ -359,13 +427,6 @@ public class ReservationsService : IReservationsService
                 // Agregar la reserva al contexto y guardar los cambios
                 _context.Reservations.Add(reservationEntity);
                 await _context.SaveChangesAsync();
-
-                // Cambiar el estado de las habitaciones a "OCUPADO" 
-                //ESTO TIENE QUE ELIMINARSE CON LA FUTURA MIGRACION
-                foreach (var room in roomsEntity)
-                {
-                    room.Condition = "OCUPADO";
-                }
 
                 //Guardar cambio de habitaciones en la base de datos
                 await _context.SaveChangesAsync();
@@ -400,17 +461,55 @@ public class ReservationsService : IReservationsService
                 // Confirmar la transacción
                 await transaction.CommitAsync();
 
+                // Volver a cargar la reserva desde la base de datos, incluyendo las demas tablas
+                var loadedReservationEntity = await _context.Reservations
+                    .Include(reserv => reserv.Rooms)
+                        .ThenInclude(rR => rR.Room)
+                            .ThenInclude(room => room.Hotel)
+                    .Include(reserv => reserv.AdditionalServices)
+                        .ThenInclude(aS => aS.AdditionalService)
+                .FirstOrDefaultAsync(reserv => reserv.Id == reservationEntity.Id);
+
+                //por si existe algun problema en cargar la reserva
+                if (loadedReservationEntity == null)
+                {
+                    return new ResponseDto<ReservationDto>
+                    {
+                        StatusCode = 404,
+                        Status = false,
+                        Message = "Error al cargar la reserva recién creada"
+                    };
+                }
+
                 // Mapear la entidad de reserva a un DTO y retornar la respuesta
                 var reservationDto = new ReservationDto
                 {
-                    Id = reservationEntity.Id,
-                    StartDate = reservationEntity.StartDate,
-                    FinishDate = reservationEntity.FinishDate,
-                    Condition = reservationEntity.Condition,
-                    Price = reservationEntity.Price,
-                    ClientId = reservationEntity.ClientId,
-                    RoomsList = roomIds.Select(id => id.ToString()).ToList(),
-                    AdditionalServicesList = additionalServicesIds.Select(id => id.ToString()).ToList()
+                    Id = loadedReservationEntity.Id,
+                    StartDate = loadedReservationEntity.StartDate,
+                    FinishDate = loadedReservationEntity.FinishDate,
+                    Condition = DateTime.Now < loadedReservationEntity.FinishDate ? "CONFIRMADA" : "COMPLETADA",
+                    Price = loadedReservationEntity.Price,
+                    ClientId = loadedReservationEntity.ClientId,
+
+                    RoomsInfoList = loadedReservationEntity.Rooms.Select(rR => new RoomDto
+                    {
+                        Id = rR.Room.Id,
+                        NumberRoom = rR.Room.NumberRoom,
+                        TypeRoom = rR.Room.TypeRoom,
+                        PriceNight = rR.Room.PriceNight,
+                        ImageUrl = rR.Room.ImageUrl,
+                        HotelInfo = new HotelDto
+                        {
+                            Id = rR.Room.Hotel.Id,
+                            Name = rR.Room.Hotel.Name
+                        }
+                    }).ToList(),
+                    AdditionalServicesInfoList = loadedReservationEntity.AdditionalServices.Select(aS => new AdditionalServiceDto
+                    {
+                        Id = aS.AdditionalService.Id,
+                        Name = aS.AdditionalService.Name,
+                        Price = aS.AdditionalService.Price,
+                    }).ToList()
                 };
 
 
@@ -447,8 +546,13 @@ public class ReservationsService : IReservationsService
             try
             {
                 //verificar que la reserva exista
-                var reservationEntity = await _context.Reservations.FindAsync(id);
-
+                var reservationEntity = await _context.Reservations
+                    .Include(reserv => reserv.Rooms)
+                        .ThenInclude(rR => rR.Room)
+                            .ThenInclude(room => room.Hotel)
+                    .Include(reserv => reserv.AdditionalServices)
+                        .ThenInclude(aS => aS.AdditionalService)
+                    .FirstOrDefaultAsync(reserv => reserv.Id == id);
                 if (reservationEntity == null)
                 {
                     return new ResponseDto<ReservationDto>
@@ -459,7 +563,7 @@ public class ReservationsService : IReservationsService
                     };
                 }
 
-                //Verificar error que la fecha actual sea menor que la fecha de inicio de la reserva
+                //Verificar error que la fecha actual se encuentre en el rango de fechas de la reserva
                 if(DateTime.Now >= reservationEntity.StartDate && DateTime.Now <= reservationEntity.FinishDate)
                 {
                     return new ResponseDto<ReservationDto>
@@ -481,8 +585,7 @@ public class ReservationsService : IReservationsService
                     };
                 }
 
-
-                //POSIBLE VERIFICACION de ver estado de habitacion: Cancelada / No cancelada
+                //POSIBLE VERIFICACION de ver estado de reserva: Cancelada / No cancelada
 
                 if (dto.StartDate < DateTime.Now)
                 {
@@ -636,7 +739,7 @@ public class ReservationsService : IReservationsService
 
                     }
 
-                    //Metodo implementando para verificar que los SA sean del mismoD hotel
+                    //Metodo implementando para verificar que los SA sean del mismo hotel
                     if (additionalServicesEntity.Any(aS => aS.HotelId != hotelId))
                     {
                         return new ResponseDto<ReservationDto>
@@ -658,7 +761,6 @@ public class ReservationsService : IReservationsService
 
                 reservationEntity.StartDate = dto.StartDate;
                 reservationEntity.FinishDate = dto.FinishDate;
-                reservationEntity.Condition = "CONFIRMADA";     //ESTE CAMPO DEBE ELIMINARSE CON LA FUTURA MIGRACION
                 reservationEntity.Price = totalAmount;  
                 reservationEntity.ClientId = _authService.GetUserId();
 
@@ -707,11 +809,29 @@ public class ReservationsService : IReservationsService
                     Id = reservationEntity.Id,
                     StartDate = reservationEntity.StartDate,
                     FinishDate = reservationEntity.FinishDate,
-                    Condition = reservationEntity.Condition,
+                    Condition = DateTime.Now < reservationEntity.FinishDate ? "CONFIRMADA" : "COMPLETADA",
                     Price = reservationEntity.Price,
                     ClientId = reservationEntity.ClientId,
-                    RoomsList = allRoomsIds.Select(id => id.ToString()).ToList(),
-                    AdditionalServicesList = allAdditionalServiceIds.Select(id => id.ToString()).ToList()
+
+                    RoomsInfoList = reservationEntity.Rooms.Select(rR => new RoomDto
+                    {
+                        Id = rR.Room.Id,
+                        NumberRoom = rR.Room.NumberRoom,
+                        TypeRoom = rR.Room.TypeRoom,
+                        PriceNight = rR.Room.PriceNight,
+                        ImageUrl = rR.Room.ImageUrl,
+                        HotelInfo = new HotelDto
+                        {
+                            Id = rR.Room.Hotel.Id,
+                            Name = rR.Room.Hotel.Name
+                        }
+                    }).ToList(),
+                    AdditionalServicesInfoList = reservationEntity.AdditionalServices.Select(aS => new AdditionalServiceDto
+                    {
+                        Id = aS.AdditionalService.Id,
+                        Name = aS.AdditionalService.Name,
+                        Price = aS.AdditionalService.Price,
+                    }).ToList()
                 };
 
                 return new ResponseDto<ReservationDto>
@@ -785,5 +905,4 @@ public class ReservationsService : IReservationsService
         }
     }
 
-    //AQUI SE TENDRIAN QUE COLOCAR LOS CODIGOS RECICLADOS 
 }

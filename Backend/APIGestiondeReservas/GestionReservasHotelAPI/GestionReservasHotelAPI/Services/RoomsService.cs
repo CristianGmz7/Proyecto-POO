@@ -29,10 +29,12 @@ public class RoomsService : IRoomsService
     }
 
     //Este servicio no se utiliza aun en el frontend
-    //mapeo actualizado
+    //mapeo actualizado, espacios no necesarios no se cargan: addres, stars, numberPhone, overview
     public async Task<ResponseDto<List<RoomDto>>> GetRoomsListAsync()
     {
-        var roomsEntity = await _context.Rooms.ToListAsync();
+        var roomsEntity = await _context.Rooms
+            .Include(room => room.Hotel)
+            .ToListAsync();
 
         //el tipo sera List<RoomDto> y se convertira de RoomEntity que es la variable roomsEntity
         //verificar si para este caso es necesario descomentar el Id del Hotel del Dto
@@ -66,6 +68,7 @@ public class RoomsService : IRoomsService
 
     //metodo obtener todas las habitaciones de un hotel, este se utiliza en el frontend
     //el id del hotel, el numero de pagina y las fechas de inicio y fin
+    //aqui no se toma en cuenta la condicion porque se supone que habitaciones que se listan estaran disponibles segun las fechas
     public async Task<ResponseDto<PaginationDto<List<RoomDto>>>> GetRoomsOneHotelAsync(
         Guid id, int page = 1,
         DateTime filterStartDate = default, DateTime filterEndDate = default)
@@ -78,6 +81,18 @@ public class RoomsService : IRoomsService
         {
             filterEndDate = DateTime.Now.AddDays(1);
         }
+        
+        //posible solucion si llega a dar problemas, validar solo las fechas sin tomar en cuenta la hora
+        if(filterStartDate < DateTime.Now)
+        {
+            return new ResponseDto<PaginationDto<List<RoomDto>>>
+            {
+                StatusCode = 404,
+                Status = false,
+                Message = "La fecha de inicio del filtro debe ser mayor que la fecha actual"
+            };
+        }
+        
         if (filterEndDate < filterStartDate)
         {
             return new ResponseDto<PaginationDto<List<RoomDto>>>
@@ -115,10 +130,10 @@ public class RoomsService : IRoomsService
                     rr.Reservation.StartDate < filterEndDate &&
                     rr.Reservation.FinishDate > filterStartDate)
             ));
-
+        
         int totalRooms = await roomEntityQuery.CountAsync();
 
-        int totalPages = (int)Math.Ceiling((double)totalRooms);
+        int totalPages = (int)Math.Ceiling((double)totalRooms / PAGE_SIZE);
 
         var roomsEntity = await roomEntityQuery
             .OrderByDescending(x => x.NumberRoom)
@@ -167,10 +182,11 @@ public class RoomsService : IRoomsService
 
     }
 
-    //Ojo con los includes
     public async Task<ResponseDto<RoomDto>> GetRoomById(Guid id)
     {
-        var roomEntity = await _context.Rooms.FindAsync(id);
+        var roomEntity = await _context.Rooms
+            .Include(room => room.Hotel)
+            .FirstOrDefaultAsync(r => r.Id == id);
 
         if(roomEntity == null)
         {
@@ -182,8 +198,6 @@ public class RoomsService : IRoomsService
             };
         }
 
-        //var roomDto = _mapper.Map<RoomDto>(roomEntity);
-        //hacer mapeo manualmente
         var roomDto = new RoomDto
         {
             Id = roomEntity.Id,
@@ -211,6 +225,7 @@ public class RoomsService : IRoomsService
         };
     }
 
+    //no se coloco Includes porque al crear la habitacion se asigna con el hotel que se manda (supongo)
     public async Task<ResponseDto<RoomDto>> CreateAsync(RoomCreateDto dto)
     {
         var roomEntity = _mapper.Map<RoomEntity>(dto);
@@ -272,7 +287,9 @@ public class RoomsService : IRoomsService
 
     public async Task<ResponseDto<RoomDto>> EditAsync (RoomEditDto dto, Guid id)
     {
-        var roomEntity = await _context.Rooms.FindAsync(id);
+        var roomEntity = await _context.Rooms
+            .Include(room => room.Hotel)
+            .FirstOrDefaultAsync(r => r.Id == id);
 
         if(roomEntity == null)
         {

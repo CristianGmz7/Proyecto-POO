@@ -17,7 +17,7 @@ export const SideBarReservation = () => {
       type: "Doble",
       price: "$150 por noche",
       hotelName: "Hotel Plaza",
-    },                                                                        
+    },
     {
       id: 3,
       img: "https://www.infobae.com/new-resizer/pUEjNBD7vjpNWcQGlao78XnLswk=/768x432/filters:format(webp):quality(85)/s3.amazonaws.com/arc-wordpress-client-uploads/infobae-wp/wp-content/uploads/2019/05/20152644/The-Resort-at-Pedregal-1.jpg",
@@ -59,16 +59,20 @@ export const SideBarReservation = () => {
             </div>
           ))}
         </div>
-        <h3 className="text-md font-bold mt-4 text-blue-700 mb-2">Servicios Adicionales</h3>
+        <h3 className="text-md font-bold mt-4 text-blue-700 mb-2">
+          Servicios Adicionales
+        </h3>
         <div className="border rounded-lg p-4 shadow-md bg-white hover:bg-blue-50 transition-colors">
           <p className="text-blue-700">Nombre servicio:</p>
           <p className="text-blue-600">Precio:</p>
         </div>
         <p className="font-bold mt-4 text-blue-800">Total Reserva = $$</p>
-  
+
         {/* Estado de la Reserva Section */}
         <section className="border rounded-lg p-6 mb-6 shadow-md bg-blue-100">
-          <h2 className="text-lg font-bold text-blue-800 mb-4">Estado de la Reserva</h2>
+          <h2 className="text-lg font-bold text-blue-800 mb-4">
+            Estado de la Reserva
+          </h2>
           <div className="flex items-center justify-between text-blue-600 mb-6">
             <p className="font-bold">Estado:</p>
             <div className="flex items-center">
@@ -102,7 +106,7 @@ export const SideBarReservation = () => {
             </div>
           </div>
         </section>
-  
+
         <Button
           variant="contained"
           sx={{
@@ -115,7 +119,7 @@ export const SideBarReservation = () => {
         >
           Eliminar Reserva
         </Button>
-  
+
         <Button
           className="absolute right-100"
           variant="contained"
@@ -130,9 +134,8 @@ export const SideBarReservation = () => {
           Editar Reserva
         </Button>
       </section>
-  
+
       <Pagination />
     </div>
   );
-  
 };

@@ -6,7 +6,7 @@ export const SideBarReservation = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const roomsPerPage = 2;
 
-  // Array de objetos para cada habitación
+  // Array de objetos para cada habit                                                                                                     ación
   const rooms = [
     {
       id: 1,
@@ -21,7 +21,7 @@ export const SideBarReservation = () => {
       type: "Doble",
       price: "$150 por noche",
       hotelName: "Hotel Plaza",
-    },
+    },                                                                        
     {
       id: 3,
       img: "https://www.infobae.com/new-resizer/pUEjNBD7vjpNWcQGlao78XnLswk=/768x432/filters:format(webp):quality(85)/s3.amazonaws.com/arc-wordpress-client-uploads/infobae-wp/wp-content/uploads/2019/05/20152644/The-Resort-at-Pedregal-1.jpg",
@@ -77,10 +77,9 @@ export const SideBarReservation = () => {
           <p className="text-blue-600">Precio:</p>
         </div>
         <p className="font-bold mt-4 text-blue-800">Total Reserva = $$</p>
-      </section>
-      
-      {/* Estado de la Reserva Section */}
-      <section className="border rounded-lg p-6 mb-6 shadow-md bg-blue-100">
+    
+          {/* Estado de la Reserva Section */}
+          <section className="border rounded-lg p-6 mb-6 shadow-md bg-blue-100">
         <h2 className="text-lg font-bold text-blue-800 mb-4">Estado de la Reserva</h2>
         <div className="flex items-center justify-between text-blue-600 mb-6">
           <p className="font-bold">Estado:</p>
@@ -114,43 +113,8 @@ export const SideBarReservation = () => {
             </Button>
           </div>
         </div>
-      </section>
+          </section>
 
-      {/* Eliminar Reserva Section */}
-      <section className="border rounded-lg p-6 mb-6 shadow-md bg-blue-100">
-        <h2 className="text-lg font-bold text-blue-800 mb-4">ELIMINAR RESERVA</h2>
-        <div className="flex justify-between text-blue-600 mb-6">
-          <p>Reserva: #1</p>
-          <p>Inicio: 17/08/2024</p>
-          <p>Fin: 19/08/2024</p>
-        </div>
-        <h3 className="text-md font-bold text-blue-700 mb-2">Habitaciones</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {currentRooms.map((room) => (
-            <div
-              key={room.id}
-              className="border rounded-lg p-4 shadow-md bg-white hover:bg-blue-50 transition-colors"
-            >
-              <img
-                src={room.img}
-                alt={`Habitación ${room.id}`}
-                className="rounded-lg mb-2 w-full h-auto"
-                style={{ aspectRatio: "1 / 1", objectFit: "cover" }}
-              />
-              <p className="text-blue-700">Habitación {room.id}</p>
-              <p className="text-blue-600">{room.type}</p>
-              <p className="text-blue-600">{room.price}</p>
-              <p className="text-blue-600">{room.hotelName}</p>
-            </div>
-          ))}
-        </div>
-        <h3 className="text-md font-bold mt-4 text-blue-700 mb-2">Servicios Adicionales</h3>
-        <div className="border rounded-lg p-4 shadow-md bg-white hover:bg-blue-50 transition-colors">
-          <p className="text-blue-700">Nombre servicio:</p>
-          <p className="text-blue-600">Precio:</p>
-        </div>
-        <p className="font-bold mt-4 text-blue-800">Total Reserva = $$</p>
-        <div className="flex justify-center mt-6">
           <Button
             variant="contained"
             sx={{
@@ -163,27 +127,24 @@ export const SideBarReservation = () => {
           >
             Eliminar Reserva
           </Button>
-        </div>
+
+          <Button
+          className="absolute right-100 "
+            variant="contained"
+            sx={{
+              backgroundColor: "#00acee",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: "#0099cc",
+              },
+            }}
+          >
+            Editar Reserva
+          </Button>
       </section>
 
       {/* Pagination */}
-      <div className="flex justify-center mt-6">
-        <Pagination
-          count={Math.ceil(rooms.length / roomsPerPage)}
-          page={currentPage}
-          onChange={handlePageChange}
-          color="primary"
-          sx={{
-            "& .MuiPaginationItem-root": {
-              color: "#00acee",
-            },
-            "& .Mui-selected": {
-              backgroundColor: "#00acee",
-              color: "#fff",
-            },
-          }}
-        />
-      </div>
+      
     </div>
   );
 };

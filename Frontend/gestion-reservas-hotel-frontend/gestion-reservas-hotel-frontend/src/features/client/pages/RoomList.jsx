@@ -8,6 +8,7 @@ import { Button } from "@mui/material";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Pagination } from "../components/Pagination";
 
 export const RoomList = () => {
 
@@ -155,6 +156,7 @@ export const RoomList = () => {
         {/* Fin Botón implementado cuando se selecciona habitaciones */}
       </div>
       {/* Fin del div que sirve para agrupar */}
+      <Pagination/>
     </div>
   )
 }

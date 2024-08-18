@@ -24,11 +24,11 @@ export const Nav = () => {
   }, [isOpen]);
 
   return (
-    <header className="w-full bg-blue-50 border-b border-blue-200 shadow-lg">
+    <header className="w-full bg-blue-50 border-b border-blue-200 shadow-lg relative z-20">
       <div className="container flex items-center justify-between h-16 px-4 md:px-6 lg:px-8">
-        <a href="#" className="text-lg font-bold text-blue-600 hover:text-blue-800 transition-colors duration-300">
+        <Link to="/home" href="#" className="text-lg font-bold text-blue-600 hover:text-blue-800 transition-colors duration-300">
           Hondu Reservas
-        </a>
+        </Link>
         <nav className="hidden md:flex md:gap-6 lg:gap-8">
           <Link 
             to={"/home"}

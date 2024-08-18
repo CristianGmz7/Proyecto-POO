@@ -7,7 +7,7 @@ import { Login } from "../pages/Login"
 
 export const ClientRouter = () => {
   return (
-    <div  className="overflow-x-hidden bg-gray-100 w-screen h-screen bg-hero-pattern bg-no-repeat bg-cover">
+    <div  className="overflow-x-hidden bg-gray-100 w-screen h-screen">
         <Nav/>
         <div className="px-6 py-8 flex">
             <SideBar/>

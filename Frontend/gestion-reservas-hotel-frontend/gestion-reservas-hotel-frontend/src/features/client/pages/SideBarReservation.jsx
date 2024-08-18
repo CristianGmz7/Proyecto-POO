@@ -1,11 +1,7 @@
-import { Button, Pagination } from "@mui/material";
-import { useState } from "react";
+import { Button } from "@mui/material";
+import { Pagination } from "../components/Pagination";
 
 export const SideBarReservation = () => {
-  // Estado para la página actual de la paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const roomsPerPage = 2;
-
   // Array de objetos para cada habit                                                                                                     ación
   const rooms = [
     {
@@ -33,17 +29,9 @@ export const SideBarReservation = () => {
   ];
 
   // Cálculo de las habitaciones para mostrar en la página actual
-  const indexOfLastRoom = currentPage * roomsPerPage;
-  const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
-  const currentRooms = rooms.slice(indexOfFirstRoom, indexOfLastRoom);
-
-  // Manejador de cambio de página
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
 
   return (
-    <div className="container mx-auto p-6 bg-blue-50 text-blue-900 rounded-lg shadow-lg">
+    <div className="container mx-auto p-4 md:p-6 bg-blue-50 text-blue-900 rounded-lg shadow-lg">
       {/* Reserva Section */}
       <section className="border rounded-lg p-6 mb-6 shadow-md bg-blue-100">
         <h2 className="text-lg font-bold text-blue-800 mb-4">Reserva: #1</h2>
@@ -52,8 +40,8 @@ export const SideBarReservation = () => {
           <p>Fin: 19/08/2024</p>
         </div>
         <h3 className="text-md font-bold text-blue-700 mb-2">Habitaciones</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {currentRooms.map((room) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {rooms.map((room) => (
             <div
               key={room.id}
               className="border rounded-lg p-4 shadow-md bg-white hover:bg-blue-50 transition-colors"
@@ -77,74 +65,74 @@ export const SideBarReservation = () => {
           <p className="text-blue-600">Precio:</p>
         </div>
         <p className="font-bold mt-4 text-blue-800">Total Reserva = $$</p>
-    
-          {/* Estado de la Reserva Section */}
-          <section className="border rounded-lg p-6 mb-6 shadow-md bg-blue-100">
-        <h2 className="text-lg font-bold text-blue-800 mb-4">Estado de la Reserva</h2>
-        <div className="flex items-center justify-between text-blue-600 mb-6">
-          <p className="font-bold">Estado:</p>
-          <div className="flex items-center">
-            <Button
-              variant="outlined"
-              sx={{
-                color: "#00acee",
-                borderColor: "#00acee",
-                "&:hover": {
-                  borderColor: "#0099cc",
-                  color: "#0099cc",
-                },
-              }}
-              className="mr-4"
-            >
-              Confirmado
-            </Button>
-            <Button
-              variant="outlined"
-              sx={{
-                color: "#00acee",
-                borderColor: "#00acee",
-                "&:hover": {
-                  borderColor: "#0099cc",
-                  color: "#0099cc",
-                },
-              }}
-            >
-              Completado
-            </Button>
+  
+        {/* Estado de la Reserva Section */}
+        <section className="border rounded-lg p-6 mb-6 shadow-md bg-blue-100">
+          <h2 className="text-lg font-bold text-blue-800 mb-4">Estado de la Reserva</h2>
+          <div className="flex items-center justify-between text-blue-600 mb-6">
+            <p className="font-bold">Estado:</p>
+            <div className="flex items-center">
+              <Button
+                variant="outlined"
+                sx={{
+                  color: "#00acee",
+                  borderColor: "#00acee",
+                  "&:hover": {
+                    borderColor: "#0099cc",
+                    color: "#0099cc",
+                  },
+                }}
+                className="mr-4"
+              >
+                Confirmado
+              </Button>
+              <Button
+                variant="outlined"
+                sx={{
+                  color: "#00acee",
+                  borderColor: "#00acee",
+                  "&:hover": {
+                    borderColor: "#0099cc",
+                    color: "#0099cc",
+                  },
+                }}
+              >
+                Completado
+              </Button>
+            </div>
           </div>
-        </div>
-          </section>
-
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#00acee",
-              color: "#fff",
-              "&:hover": {
-                backgroundColor: "#0099cc",
-              },
-            }}
-          >
-            Eliminar Reserva
-          </Button>
-
-          <Button
-          className="absolute right-100 "
-            variant="contained"
-            sx={{
-              backgroundColor: "#00acee",
-              color: "#fff",
-              "&:hover": {
-                backgroundColor: "#0099cc",
-              },
-            }}
-          >
-            Editar Reserva
-          </Button>
+        </section>
+  
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#00acee",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "#0099cc",
+            },
+          }}
+        >
+          Eliminar Reserva
+        </Button>
+  
+        <Button
+          className="absolute right-100"
+          variant="contained"
+          sx={{
+            backgroundColor: "#00acee",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "#0099cc",
+            },
+          }}
+        >
+          Editar Reserva
+        </Button>
       </section>
-
-      {/* Pagination */}
-      
+  
+      <Pagination />
     </div>
   );
+  
 };

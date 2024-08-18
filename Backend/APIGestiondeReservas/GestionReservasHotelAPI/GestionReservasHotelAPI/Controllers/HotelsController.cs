@@ -17,7 +17,7 @@ namespace GestionReservasHotelAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ResponseDto<List<HotelDto>>>> GetAll(int page = 1)
+        public async Task<ActionResult<ResponseDto<PaginationDto<List<HotelDto>>>>> GetAll(int page = 1)
         {
             var response = await _hotelsService.GetHotelsListAsync(page);
 

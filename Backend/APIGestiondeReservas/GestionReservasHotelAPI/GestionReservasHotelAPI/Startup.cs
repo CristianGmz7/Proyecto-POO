@@ -36,6 +36,16 @@ public class Startup
         // Add AutoMapper
         services.AddAutoMapper(typeof(AutoMapperProfile));
 
+        services.AddCors(opt =>
+        {
+            var allowURLS = Configuration.GetSection("AllowURLS").Get<string[]>();
+            opt.AddPolicy("CorsPolicy", builder => builder
+            .WithOrigins(allowURLS)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+        });
+
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -49,6 +59,9 @@ public class Startup
         app.UseHttpsRedirection();
 
         app.UseRouting();
+
+        //aqui se agrega lo del cors
+        app.UseCors("CorsPolicy");
 
         app.UseAuthorization();
 

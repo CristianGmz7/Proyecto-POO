@@ -81,9 +81,18 @@ namespace GestionReservasHotelAPI.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Address")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("address");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("image_url");
 
                     b.Property<string>("Name")
                         .HasMaxLength(50)
@@ -93,6 +102,11 @@ namespace GestionReservasHotelAPI.Migrations
                     b.Property<int>("NumberPhone")
                         .HasColumnType("int")
                         .HasColumnName("number_phone");
+
+                    b.Property<string>("Overview")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("overview");
 
                     b.Property<int>("StarsMichelin")
                         .HasColumnType("int")
@@ -113,10 +127,6 @@ namespace GestionReservasHotelAPI.Migrations
                     b.Property<string>("ClientId")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("client_id");
-
-                    b.Property<string>("Condition")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("condition");
 
                     b.Property<DateTime>("FinishDate")
                         .HasColumnType("datetime2")
@@ -142,13 +152,13 @@ namespace GestionReservasHotelAPI.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
-                    b.Property<string>("Condition")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("condition");
-
                     b.Property<Guid>("HotelId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("hotel_id");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("image_url");
 
                     b.Property<int>("NumberRoom")
                         .HasColumnType("int")

@@ -18,12 +18,11 @@ public class RoomEntity : BaseEntity
     [Column("price_night")]
     public double PriceNight { get; set; }
 
-    [RegularExpression("^(DISPONIBLE|OCUPADO|EN MANTENIMIENTO)$")]
-    [Column("condition")]
-    public string Condition { get; set; }
-
     [Column("hotel_id")]
     public Guid HotelId { get; set; }
+
+    [Column("image_url")]
+    public string ImageUrl { get; set; }
 
     [ForeignKey(nameof(HotelId))]
     public virtual HotelEntity Hotel { get; set; }

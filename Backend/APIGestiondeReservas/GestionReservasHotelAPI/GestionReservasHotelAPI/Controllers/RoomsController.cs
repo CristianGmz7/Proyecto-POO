@@ -27,9 +27,12 @@ public class RoomsController : ControllerBase
     }
 
     [HttpGet("GetByHotel/{id}")]
-    public async Task<ActionResult<List<RoomDto>>> GetAllByHotel(Guid id)
+    public async Task<ActionResult<List<RoomDto>>> GetAllByHotel(Guid id, 
+        int page = 1, 
+        DateTime filterStartDate = default, 
+        DateTime filterEndDate = default)
     {
-        var response = await _roomsService.GetRoomsOneHotelAsync(id);
+        var response = await _roomsService.GetRoomsOneHotelAsync(id, page, filterStartDate, filterEndDate);
 
         return StatusCode(response.StatusCode, response);
     }

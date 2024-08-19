@@ -1,3 +1,6 @@
+//Esta es pagina que muestra el resumen de la reservación, mostrando las habitaciones seleccionadas
+//asi como servicios adicionales que incluye el hotel
+
 import { Button, Checkbox, CircularProgress } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { useReservation } from "../contexts/reservationContext";
@@ -8,30 +11,52 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 
 export const ReservationList = () => {
+  //hook que consume (obtiene) un contexto: useReservation
   const { selectedRooms, daysInterval, dateInterval } = useReservation();
+  //useAdditionalServices() trae los servicios adicionales del hotel, hook donde se hace la petición
   const [{ data, loading }] = useAdditionalServices();
+  //useCreateReservation sirve para crear la reservación
+  //ademas del error también devuelve loading, data no porque es el método de crear
   const [{ error }, createMutation] = useCreateReservation();
+  //este hook calcula guarda data relacionado a los servicios adicionales seleccionados
   const { selectedServices, toggleService, totalServices } =
     useSelectedServices();
+    
+  //del hook anterior: selectedServices es para los servicios Seleccionados, el toggleService función para agregar remover servicios
+    //lo que tenga toggle recibe algo, si ya existe lo elimina y si no existe lo agrega
 
+  //navigate es una función de react-router-dom para navegar entre las diferentes rutas de la app
   const navigate = useNavigate();
 
+  //función que suma el total del precio de las habitaciones
+  //ya se sabe que habitaciones se seleccionaron (gracias al contexto)
+  //por cada habitación seleccionada suma el acumulador mas la habitación que se esta recorriendo
   const costRooms = selectedRooms.reduce(
     (acc, { priceNight }) => acc + priceNight,
     0
   );
 
+  //función para crear la reservación
+  //aqui se mandan los datos que se necesitan en API para poder procesar la reservación
   const onCreateReservation = async () => {
     const createDto = {
       startDate: dateInterval.startDate,
       finishDate: dateInterval.endDate,
+      //solo se necesitan las habitaciones, por eso se mapea
       roomsList: selectedRooms.map(({ id }) => id),
       additionalServicesList: selectedServices.map(({ id }) => id),
       clientId: "qwqw",
+      //por el momento este dato se esta fijando en el backend
     };
 
+    //se llama a la siguiente función para crear la reserva, que devolvió el objeto {manual: true} en el hook
+    //useCreateReservation
+    //se le tiene que pasar un objeto data donde está la información que quiero enviar 
     await createMutation({ data: createDto });
+
+    //si la petición anterior falla, no se ejecutará las siguientes dos lineas
     toast.success("Reservación creada con éxito");
+    //devuelve al usuario a la pagine Home
     navigate("/");
   };
 

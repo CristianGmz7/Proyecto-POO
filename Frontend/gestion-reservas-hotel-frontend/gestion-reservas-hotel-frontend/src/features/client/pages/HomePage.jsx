@@ -1,9 +1,23 @@
+//Corazón de la pagina principal de la app
+
+//useHotel se utiliza para obtener una lista paginada de hoteles, encargado de gestionar la lògica
+//obtener los hoteles desde la API y proporciona los datos de los hoteles, indicador de carga (loading)
+//y un posible error
 import useHotel from "../hooks/useHotel";
+//HotelCard muestra las tarjetas de hoteles para ca hotel de la vista, recibe un objeto de hotel como
+//prop y renderiza una tarjeta con los detalles del hotel
 import { HotelCard } from "../components/HotelCard";
+//Pagination permite al usuario navegar entre las diferentes paginas, 
 import Pagination from "@mui/material/Pagination";
+//usePagination, hook que gestiona la lógica de Paginación, manteniendo el estado actual de 
+//la pagina actual y proporciona funcionalidad para cambiar de pagina
 import { usePagination } from "../hooks/usePagination";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export const HomePage = () => {
+  // Flujo de datos: 1. 2. 3. 4. 5.
+  //1. HomePage llama a useHotel para obtener datos de los hoteles
+  //2. useHotel realiza petición a la API, actualiza estado de datos obtenidos o con cualquier error
   const { handlePageChange, page } = usePagination();
   const { paginatedHotels, loading, error } = useHotel(page);
 
@@ -13,25 +27,39 @@ export const HomePage = () => {
         <h1 className="text-4xl font-bold text-center mb-8">
           Bienvenidos al Sistema de Gestión de Reservas de Hotel
         </h1>
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <section className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* 3. renderiza las tarjetas de hoteles con HotelCard para cada
+          hotel en la lista paginatedHotels*/}
           {loading ? (
-            <div>Poner skeleton...</div>
+          <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-70">
+            <CircularProgress />
+          </div>
           ) : (
+            //se accede a los items y eso es lo que se irá recorriendo
+            //signo de interrogación para evitar problemas con nulos o undefined 
             paginatedHotels?.items?.map((hotel) => (
+              //asignarle el key del hotel a cada card y el resto de parámetros enviarlos
               <HotelCard key={hotel?.id} hotel={hotel} />
             ))
           )}
         </section>
       </div>
 
+      {/* 4. HomePage renderiza el componente Pagination para permitir al usuario navegar entre
+      las diferentes paginas */}
       {/* {JSON.stringify(paginatedHotels)} */}
       {/* Inicio de paginación */}
       <div className="flex flex-row justify-center items-center">
         <Pagination
+        //con la pagibación que viene de useHotels y que viene de hotelcAction 
           count={paginatedHotels?.totalPages}
           page={paginatedHotels?.currentPage}
+          // 5. Cuando el usuario cambia de pagina, el hook usePagination actualiza el estado
+          //de la pagina actual y useHotel se vuelve a ejecutar para obtener hoteles de nueva pagina
           onChange={(_event, page) => handlePageChange(page)}
           key={paginatedHotels?.currentPage}
+          //se le coloco key porque si no habàa bug que no se actualizaba si se presionaba
+          //se le obliga a react a que re renderice el componente
         />
       </div>
       {/* Fin de paginación */}
@@ -92,19 +120,3 @@ export const HomePage = () => {
   );
 };
 
-function StarIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-6 h-6 text-current"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
-}

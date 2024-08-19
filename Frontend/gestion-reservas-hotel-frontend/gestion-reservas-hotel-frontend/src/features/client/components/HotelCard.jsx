@@ -1,4 +1,12 @@
+//Componente que renderiza una tarjeta con la información de un hotel individual en pagina principal
+
 import { Link } from "react-router-dom";
+
+//recibe como parámetro un objeto hotel que tiene la info del hotel a mostrar
+
+//porque sale la advertencia de propiedades
+//se utiliza hotel dentro del componente pero no se ha especificado el tipo de dato esperado
+//para sus propiedades (como imageUrl, name...)
 
 export const HotelCard = ({ hotel }) => {
   return (
@@ -13,7 +21,11 @@ export const HotelCard = ({ hotel }) => {
       <div className="p-6">
         <div className="columns-1">
           <div className="flex">
+            {/* Crear un nuevo array cuyo tamaño es igual al número de estrellas Michellin del hotel */}
             {Array.from({ length: hotel.starsMichelin }).map((_, index) => (
+                            //.map recorre cada elemento del array; _ el primer elemento se omite
+                            ///mientras que el segundo parametro se utiliza como llave key
+                            //para que renderice de forma unica cada estrella 
               <StarIcon key={index} className="w-5  h-5 fill-primary" />
             ))}
           </div>
@@ -22,6 +34,8 @@ export const HotelCard = ({ hotel }) => {
         <p className="text-gray-700 text-sm">{hotel.address}</p>
         <p className="text-gray-500 text-sm h-[60px]">{hotel.overview}</p>
         <Link
+        // Aquí se enlaza la pagina de los detalles del hotel y la lista de habitaciones del hotel 
+        // /roomList viene siendo rama base y hotel.id crea una URL dinámica 
           to={`/roomList/${hotel.id}`}
           className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-blue-600 text-white 
            font-medium transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600

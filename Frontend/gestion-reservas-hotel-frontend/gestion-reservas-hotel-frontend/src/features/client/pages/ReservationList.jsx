@@ -1,111 +1,148 @@
-import { Button, Checkbox } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Button, Checkbox, CircularProgress } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import { useReservation } from "../contexts/reservationContext";
+import { useAdditionalServices } from "../hooks/useAdditionalServices";
+import { useSelectedServices } from "../hooks/useSelectedServices";
+import { useCreateReservation } from "../hooks/useCreateReservation";
+import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 export const ReservationList = () => {
+  const { selectedRooms, daysInterval, dateInterval } = useReservation();
+  const [{ data, loading }] = useAdditionalServices();
+  const [{ error }, createMutation] = useCreateReservation();
+  const { selectedServices, toggleService, totalServices } =
+    useSelectedServices();
+
+  const navigate = useNavigate();
+
+  const costRooms = selectedRooms.reduce(
+    (acc, { priceNight }) => acc + priceNight,
+    0
+  );
+
+  const onCreateReservation = async () => {
+    const createDto = {
+      startDate: dateInterval.startDate,
+      finishDate: dateInterval.endDate,
+      roomsList: selectedRooms.map(({ id }) => id),
+      additionalServicesList: selectedServices.map(({ id }) => id),
+      clientId: "qwqw",
+    };
+
+    await createMutation({ data: createDto });
+    toast.success("Reservación creada con éxito");
+    navigate("/");
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6 sm:p-8 md:p-10 bg-blue-50 text-foreground rounded-lg shadow-xl">
       <div className="flex items-center justify-between mb-6">
         <Link
-          to={"/roomList/bc41c7dc-97cc-4054-a1e7-7e97768719d9"}
+          to={-1}
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
         >
           <ChevronLeftIcon className="w-5 h-5" />
           Regresar
         </Link>
-        <h1 className="text-2xl font-bold text-blue-700 text-center">Su reservación</h1>
+        <h1 className="text-2xl font-bold text-blue-700 text-center">
+          Su reservación
+        </h1>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {[
-          {
-            room: 101,
-            type: "Habitación Sencilla",
-            price: "$100 por noche",
-            imageUrl: "https://www.infobae.com/new-resizer/pUEjNBD7vjpNWcQGlao78XnLswk=/768x432/filters:format(webp):quality(85)/s3.amazonaws.com/arc-wordpress-client-uploads/infobae-wp/wp-content/uploads/2019/05/20152644/The-Resort-at-Pedregal-1.jpg",
-          },
-          {
-            room: 102,
-            type: "Habitación Doble",
-            price: "$150 por noche",
-            imageUrl: "https://www.infobae.com/new-resizer/qK7LgoaH3riDyEc3BkoYq9aOAwU=/768x432/filters:format(webp):quality(85)/s3.amazonaws.com/arc-wordpress-client-uploads/infobae-wp/wp-content/uploads/2019/05/20152026/The-Peninsula-Manila-2.jpg",
-          },
-          {
-            room: 103,
-            type: "Suite",
-            price: "$200 por noche",
-            imageUrl: "https://www.infobae.com/new-resizer/C-piX6RnCHRWPlVOqHK39L4-LJY=/768x432/filters:format(webp):quality(85)/s3.amazonaws.com/arc-wordpress-client-uploads/infobae-wp/wp-content/uploads/2019/05/20152130/Bulgari-Resort-Bali-2.jpg",
-          },
-        ].map(({ room, type, price, imageUrl }) => (
-          <div
-            key={room}
-            className="bg-blue-100 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow"
-          >
-            <img
-              src={imageUrl}
-              alt={`Habitación ${room}`}
-              width={400}
-              height={300}
-              className="w-full h-48 object-cover"
-              style={{ aspectRatio: "400/300", objectFit: "cover" }}
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-blue-700">Habitación {room}</h3>
-              <p className="text-blue-500">{type}</p>
-              <p className="font-semibold text-blue-600">{price}</p>
+        {selectedRooms?.map(
+          ({ id, typeRoom, priceNight, imageUrl, numberRoom }) => (
+            <div
+              key={id}
+              className="bg-blue-100 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow"
+            >
+              <img
+                src={imageUrl}
+                alt={`Habitación ${numberRoom}`}
+                width={400}
+                height={300}
+                className="w-full h-48 object-cover"
+                style={{ aspectRatio: "400/300", objectFit: "cover" }}
+              />
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-blue-700">
+                  Habitación {numberRoom}
+                </h3>
+                <p className="text-blue-500">{typeRoom}</p>
+                <p className="font-semibold text-blue-600">$ {priceNight}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
       <div className="mt-6">
-        <h2 className="text-lg font-semibold mb-2 text-blue-600">Servicios adicionales</h2>
+        <h2 className="text-lg font-semibold mb-2 text-blue-600">
+          Servicios adicionales
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {["Desayuno incluido", "Acceso al gimnasio", "Acceso al spa"].map(
-            (service) => (
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <CircularProgress />
+            </div>
+          ) : (
+            data?.data?.map(({ id, name, price }) => (
               <div
-                key={service}
+                key={id}
                 className="bg-blue-100 rounded-lg p-4 shadow-lg hover:bg-blue-200 transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    id={service.toLowerCase().replace(" ", "-")}
+                    id={name}
                     sx={{
                       color: "#007bff",
                       "&.Mui-checked": {
                         color: "#007bff",
                       },
                     }}
+                    value={selectedServices.some(
+                      (service) => service.id === id
+                    )}
+                    onChange={() => {
+                      toggleService({ id, name, price });
+                    }}
                   />
-                  <label
-                    htmlFor={service.toLowerCase().replace(" ", "-")}
-                    className="text-blue-600"
-                  >
-                    {service}
+                  <label htmlFor={name} className="text-blue-600">
+                    {name}
                   </label>
                 </div>
               </div>
-            )
+            ))
           )}
         </div>
       </div>
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="bg-blue-100 rounded-lg p-4 shadow-lg">
-          <h2 className="text-lg font-semibold mb-2 text-blue-600">Total de habitaciones</h2>
-          <p className="text-2xl font-bold text-blue-800">$450</p>
+          <h2 className="text-lg font-semibold mb-2 text-blue-600">
+            Total de habitaciones
+          </h2>
+          <p className="text-2xl font-bold text-blue-800">${costRooms}</p>
         </div>
         <div className="bg-blue-100 rounded-lg p-4 shadow-lg">
-          <h2 className="text-lg font-semibold mb-2 text-blue-600">Total de servicios</h2>
-          <p className="text-2xl font-bold text-blue-800">$50</p>
+          <h2 className="text-lg font-semibold mb-2 text-blue-600">
+            Total de servicios
+          </h2>
+          <p className="text-2xl font-bold text-blue-800">${totalServices}</p>
         </div>
       </div>
       <div className="mt-6 bg-blue-200 rounded-lg p-4 shadow-lg">
-        <h2 className="text-lg font-semibold mb-2 text-center text-blue-700">Total a pagar</h2>
-        <p className="text-3xl font-bold text-blue-900">$500</p>
+        <h2 className="text-lg font-semibold mb-2 text-center text-blue-700">
+          Total a pagar
+        </h2>
+        <p className="text-3xl font-bold text-blue-900">
+          $ {(costRooms + totalServices) * (daysInterval || 1)}
+        </p>
       </div>
       <div className="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-200">
         <p className="text-sm text-blue-500">
-          Fecha de entrada: 2023-04-01
+          Fecha de entrada: {dayjs(dateInterval.startDate).format("DD/MM/YYYY")}
         </p>
         <p className="text-sm text-blue-500">
-          Fecha de salida: 2023-04-05
+          Fecha de salida: {dayjs(dateInterval.endDate).format("DD/MM/YYYY")}
         </p>
       </div>
       <div className="mt-6 text-right">
@@ -118,6 +155,7 @@ export const ReservationList = () => {
               backgroundColor: "#0069d9",
             },
           }}
+          onClick={onCreateReservation}
         >
           Confirmar
         </Button>

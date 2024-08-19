@@ -25,7 +25,6 @@ export const getHotelList = async (page = 1) => {
       })),
     };
   } catch (error) {
-    console.error(error);
     return error.response;
   }
 };

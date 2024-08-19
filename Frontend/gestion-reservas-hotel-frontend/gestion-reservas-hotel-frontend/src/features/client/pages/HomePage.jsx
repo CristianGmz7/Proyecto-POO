@@ -31,6 +31,7 @@ export const HomePage = () => {
           count={paginatedHotels?.totalPages}
           page={paginatedHotels?.currentPage}
           onChange={(_event, page) => handlePageChange(page)}
+          key={paginatedHotels?.currentPage}
         />
       </div>
       {/* Fin de paginación */}

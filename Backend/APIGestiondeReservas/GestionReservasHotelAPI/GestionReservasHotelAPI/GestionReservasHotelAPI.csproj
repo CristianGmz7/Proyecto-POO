@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Dtos\Hotels\HotelDetail.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Dtos\Hotels\NewFile.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <_ContentIncludedByDefault Remove="SeedData\hotels.json" />
   </ItemGroup>
 

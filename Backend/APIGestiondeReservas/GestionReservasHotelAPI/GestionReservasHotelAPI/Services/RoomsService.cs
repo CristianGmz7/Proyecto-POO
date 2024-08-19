@@ -69,13 +69,13 @@ public class RoomsService : IRoomsService
     //metodo obtener todas las habitaciones de un hotel, este se utiliza en el frontend
     //el id del hotel, el numero de pagina y las fechas de inicio y fin
     //aqui no se toma en cuenta la condicion porque se supone que habitaciones que se listan estaran disponibles segun las fechas
-    public async Task<ResponseDto<PaginationDto<List<RoomDto>>>> GetRoomsOneHotelAsync(
+    public async Task<ResponseDto<PaginationDto<HotelDetailDto>>> GetRoomsOneHotelAsync(
         Guid id, int page = 1,
         DateTime filterStartDate = default, DateTime filterEndDate = default)
     {
         if (filterStartDate == default)
         {
-            filterStartDate = DateTime.Now;
+            filterStartDate = DateTime.Now.AddMinutes(1);
         }
         if (filterEndDate == default)
         {
@@ -85,7 +85,7 @@ public class RoomsService : IRoomsService
         //posible solucion si llega a dar problemas, validar solo las fechas sin tomar en cuenta la hora
         if(filterStartDate < DateTime.Now)
         {
-            return new ResponseDto<PaginationDto<List<RoomDto>>>
+            return new ResponseDto<PaginationDto<HotelDetailDto>>
             {
                 StatusCode = 404,
                 Status = false,
@@ -95,7 +95,7 @@ public class RoomsService : IRoomsService
         
         if (filterEndDate < filterStartDate)
         {
-            return new ResponseDto<PaginationDto<List<RoomDto>>>
+            return new ResponseDto<PaginationDto<HotelDetailDto>>
             {
                 StatusCode = 404,
                 Status = false,
@@ -106,7 +106,7 @@ public class RoomsService : IRoomsService
 
         if(hotelEntity == null)
         {
-            return new ResponseDto<PaginationDto<List<RoomDto>>>
+            return new ResponseDto<PaginationDto<HotelDetailDto>>
             {
                 StatusCode = 404,
                 Status = false,
@@ -149,35 +149,42 @@ public class RoomsService : IRoomsService
             NumberRoom = room.NumberRoom,
             TypeRoom = room.TypeRoom,
             PriceNight = room.PriceNight,
-            ImageUrl = room.ImageUrl,
-            //este campo tiene virtual en el entity pero en el examen no
-            HotelInfo = new HotelDto
-            {
-                //estos son los campos que se necesitan para el frontend
-                Id = room.Hotel.Id,
-                Name = room.Hotel.Name,
-                Description = room.Hotel.Description,
-                ImageUrl = room.Hotel.ImageUrl
-            }
-        }
-        ).ToList();
+            ImageUrl = room.ImageUrl
+        }).ToList();
 
-        return new ResponseDto<PaginationDto<List<RoomDto>>>
+        var hotelDto = new HotelDto
+        {
+            Description = hotelEntity.Description,
+            Address = hotelEntity.Address,
+            Id = hotelEntity.Id,
+            ImageUrl = hotelEntity.ImageUrl,
+            Name = hotelEntity.Name,
+            NumberPhone = hotelEntity.NumberPhone,
+            Overview = hotelEntity.Overview,
+            StarsMichelin = hotelEntity.StarsMichelin
+        };
+
+        var hotelDetail = new PaginationDto<HotelDetailDto>
+        {
+            CurrentPage = page,
+            PageSize = PAGE_SIZE,
+            TotalItems = totalRooms,
+            TotalPages = totalPages,
+            Items = new HotelDetailDto
+            {
+                Hotel = hotelDto,
+                Rooms = roomsDto
+            },
+            HasPreviousPage = page > 1,
+            HasNextPage = page < totalPages
+        };
+
+        return new ResponseDto<PaginationDto<HotelDetailDto>>
         {
             StatusCode = 200,
             Status = true,
             Message = "Registros encontrados correctamente",
-            Data = new PaginationDto<List<RoomDto>>
-            {
-                CurrentPage = page,
-                PageSize = PAGE_SIZE,
-                TotalItems = totalRooms,
-                TotalPages = totalPages,
-                Items = roomsDto,
-                HasPreviousPage = page > 1,
-                HasNextPage = page < totalPages,
-
-            }
+            Data = hotelDetail
         };
 
     }

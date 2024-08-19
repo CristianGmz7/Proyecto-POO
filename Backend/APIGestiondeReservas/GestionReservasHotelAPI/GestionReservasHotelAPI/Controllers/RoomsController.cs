@@ -1,4 +1,5 @@
 ﻿using GestionReservasHotelAPI.Dtos.Common;
+using GestionReservasHotelAPI.Dtos.Hotels;
 using GestionReservasHotelAPI.Dtos.Rooms;
 using GestionReservasHotelAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ public class RoomsController : ControllerBase
     }
 
     [HttpGet("GetByHotel/{id}")]
-    public async Task<ActionResult<List<RoomDto>>> GetAllByHotel(Guid id, 
+    public async Task<ActionResult<ResponseDto<PaginationDto<HotelDetailDto>>>> GetAllByHotel(Guid id, 
         int page = 1, 
         DateTime filterStartDate = default, 
         DateTime filterEndDate = default)

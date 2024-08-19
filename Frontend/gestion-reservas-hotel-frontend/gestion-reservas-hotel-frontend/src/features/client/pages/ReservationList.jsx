@@ -106,8 +106,12 @@ export const ReservationList = () => {
                       toggleService({ id, name, price });
                     }}
                   />
-                  <label htmlFor={name} className="text-blue-600">
+                  <label
+                    htmlFor={name}
+                    className="text-blue-600 flex justify-between w-full"
+                  >
                     {name}
+                    <span className="text-end text-lime-600">${price}</span>
                   </label>
                 </div>
               </div>

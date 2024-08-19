@@ -11,6 +11,7 @@ import esMx from "dayjs/locale/es-mx";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useReservation } from "../contexts/reservationContext";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export const RoomList = () => {
   const [page, setPage] = useState(1);
@@ -45,7 +46,8 @@ export const RoomList = () => {
   // Función para manejar el filtro del click
   const handleFilterClick = () => {
     if (startDate > finishDate) {
-      alert("La fecha de inicio no puede ser mayor a la fecha de fin");
+
+      toast.warn("La fecha de inicio no puede ser mayor a la fecha de fin");
       return;
     }
 
@@ -55,10 +57,6 @@ export const RoomList = () => {
       finishDate: finishDate.toISOString(),
     });
   };
-
-  if (error) {
-    console.log(error.response.data.message);
-  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={esMx}>
